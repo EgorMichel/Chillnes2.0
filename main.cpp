@@ -193,11 +193,8 @@ bool::Base::is_in_base(Point a){
     return (a.distance(this->pos) * a.distance(this->pos) < radius * radius);
 }
 
-Point p1(width / 16, height / 9), p2(width / 4, height * 4 / 9), p3(width / 8, height * 7 / 9),
-        p4(width / 2, height / 3), p5(width * 3 / 4, height * 4 / 9),
-        p6(width * 7 / 8, height * 7 / 9), p7(width * 15 / 16, height / 9);
-Base b1(p1), b2(p2), b3(p3), b4(p4), b5(p5), b6(p6), b7(p7);
-vector<Base> bases = {b1, b2, b3, b4, b5, b6, b7};
+
+vector<Base> bases;
 
 
 struct button{
@@ -268,7 +265,7 @@ void Game::initVariables() {
 void Game::initWindow() {
     this->videoMode.height = height;
     this->videoMode.width = width;
-    this->window = new sf::RenderWindow(this->videoMode, "Chillness 1.1.3", sf::Style::Titlebar | sf::Style::Fullscreen);
+    this->window = new sf::RenderWindow(this->videoMode, "Chillness 1.1.3", sf::Style::Titlebar);
     this->window->setFramerateLimit(40);
 
 }
@@ -472,6 +469,12 @@ void Game::initBoard() {
 }
 
 void Game::initBase() {
+    Point p1(width / 16, height / 9), p2(width / 4, height * 4 / 9), p3(width / 8, height * 7 / 9),
+            p4(width / 2, height / 3), p5(width * 3 / 4, height * 4 / 9),
+            p6(width * 7 / 8, height * 7 / 9), p7(width * 15 / 16, height / 9);
+    Base b1(p1), b2(p2), b3(p3), b4(p4), b5(p5), b6(p6), b7(p7);
+    bases = {b1, b2, b3, b4, b5, b6, b7};
+
     for(int i = 0; i < bases.size(); i++) {
         bases[i].picture.setOrigin(base_size, base_size);
         bases[i].picture.setPosition(bases[i].pos.get_x(), bases[i].pos.get_y());
