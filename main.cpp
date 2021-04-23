@@ -32,8 +32,8 @@ class Point{
 public:
     Point() = default;
     Point(double x_, double y_){
-        x = x_;
-        y = y_;
+        x = x_*3200/width;
+        y = y_*1800/height;
     }
     double get_x() const {return x;}
     double get_y() const {return y;}
