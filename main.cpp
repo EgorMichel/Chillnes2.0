@@ -32,8 +32,8 @@ class Point{
 public:
     Point() = default;
     Point(double x_, double y_){
-        x = x_*3200/width;
-        y = y_*1800/height;
+        x = x_*width;
+        y = y_*height;
     }
     double get_x() const {return x;}
     double get_y() const {return y;}
@@ -629,6 +629,7 @@ void Game::receiveInfo() {
 bool Game::connect_to_server() {
     char buffer[2000];
     username = "Egor";
+    std::string resolution = std::to_string(width);
     sf::IpAddress ip = "192.168.0.103";
     sf::TcpSocket::Status connection = socket.connect(ip, 2000);
     if(connection == sf::Socket::Done) {
@@ -636,9 +637,12 @@ bool Game::connect_to_server() {
         std::cout << ip << endl;
         socket.receive(buffer, sizeof(buffer), received);
         socket.send(username.c_str(), username.length() + 1);
+        socket.send(resolution.c_str(), resolution.length() + 1);
         std::cout << buffer << endl;
         std::cout << "Waiting for the second player..." << endl;
         socket.receive(buffer, sizeof(buffer), received);
+        width = std::stoi(buffer);
+        height = width*9/16;
         std::cout << buffer << endl;
         std::cout << "Game will be started soon..." << endl;
     } else std::cout << "You are offline" << endl;
