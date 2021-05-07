@@ -14,8 +14,8 @@ using std::endl;
 
 
 //Global variables
-unsigned int height = sf::VideoMode::getDesktopMode().height;
-unsigned int width = sf::VideoMode::getDesktopMode().width;
+float height = sf::VideoMode::getDesktopMode().height;
+float width = sf::VideoMode::getDesktopMode().width;
 float base_size = (float)width / 32;
 int energy = 100;
 vector<int> price_of_animal = {0, 5, 10, 30};
@@ -310,6 +310,7 @@ private:
     char mode = 's';
     size_t received{};
     bool is_connected = false;
+    bool isInMenu = false;
 
     //Private functions
     void initVariables();
@@ -368,162 +369,201 @@ bool Game::running() const {
 }
 
 void Game::pollEvents() {
-    bool were_selected = false;
-    while (this->window->pollEvent(this->ev)){
-        switch(this->ev.type){
-            case sf::Event::Closed:
-                this->window->close();
-                break;
-            case sf::Event::KeyPressed:
-                if (this->ev.key.code == sf::Keyboard::Escape)
+    if(not isInMenu) {
+        bool were_selected = false;
+        while (this->window->pollEvent(ev)) {
+            switch (ev.type) {
+                case sf::Event::Closed:
+                    window->close();
+                    break;
+                case sf::Event::KeyPressed:
+                    if (ev.key.code == sf::Keyboard::Escape)
+                        this->window->close();
+                    else if (ev.key.code == sf::Keyboard::Num1)
+                        selected_type = 1;
+                    else if (ev.key.code == sf::Keyboard::Num2)
+                        selected_type = 2;
+                    else if (ev.key.code == sf::Keyboard::Num3)
+                        selected_type = 3;
+                    else if (ev.key.code == sf::Keyboard::Space)
+                        isInMenu = !isInMenu;
+                    break;
+                case sf::Event::MouseButtonPressed:
+                    if (ev.mouseButton.button == sf::Mouse::Left) {
+                        for (int i = 0; i < simple_animals.size(); i++) {
+                            if (simple_animals[i]->is_selected()) {
+                                simple_animals[i]->select(false);
+                            }
+                        }
+                        for (auto animal : simple_animals) {
+                            if (mouse.distance(animal->pos) < animal->size) animal->select(true);
+                        }
+
+                        mouse_0 = mouse;
+                        area.setFillColor(sf::Color(200, 0, 100, 100));
+                    }
+                    if (ev.mouseButton.button == sf::Mouse::Right) {
+                        for (int i = 0; i < simple_animals.size(); i++) {
+                            if (simple_animals[i]->is_selected()) {
+                                simple_animals[i]->set_aim(Point(mouse.get_x(), mouse.get_y()));
+                                simple_animals[i]->stable = false;
+                            }
+                        }
+                    }
+                    break;
+
+                case sf::Event::MouseButtonReleased:
+                    if (this->ev.mouseButton.button == sf::Mouse::Left) {
+                        this->box();
+                        for (int i = 0; i < simple_animals.size(); i++) {
+                            if (simple_animals[i]->is_selected()) were_selected = true;
+                        }
+                        if (!were_selected) {
+                            this->pushButtons();
+                            this->initAnimal();
+                            this->initBaseMenu();
+                        }
+                    }
+                    break;
+            }
+        }
+    } else {
+        while (this->window->pollEvent(this->ev)) {
+            switch (this->ev.type) {
+                case sf::Event::Closed:
                     this->window->close();
-                else if (this->ev.key.code == sf::Keyboard::Num1)
-                    selected_type = 1;
-                else if (this->ev.key.code == sf::Keyboard::Num2)
-                    selected_type = 2;
-                else if (this->ev.key.code == sf::Keyboard::Num3)
-                    selected_type = 3;
-                break;
-            case sf::Event::MouseButtonPressed:
-                if (this->ev.mouseButton.button == sf::Mouse::Left) {
-                    for (int i = 0; i < simple_animals.size(); i++){
-                        if (simple_animals[i]->is_selected()){
-                            simple_animals[i]->select(false);
-                        }
-                    }
-                    for (auto animal : simple_animals){
-                        if (mouse.distance(animal->pos) < animal->size) animal->select(true);
-                    }
-
-                    mouse_0 = mouse;
-                    area.setFillColor(sf::Color(200, 0, 100, 100));
-                }
-                if (this->ev.mouseButton.button == sf::Mouse::Right) {
-                    for (int i = 0; i < simple_animals.size(); i++){
-                        if (simple_animals[i]->is_selected()){
-                            simple_animals[i]->set_aim(Point(mouse.get_x(), mouse.get_y()));
-                            simple_animals[i]->stable = false;
-                        }
-                    }
-                }
-                break;
-
-            case sf::Event::MouseButtonReleased:
-                if (this->ev.mouseButton.button == sf::Mouse::Left) {
-                    this->box();
-                    for (int i = 0; i < simple_animals.size(); i++){
-                        if (simple_animals[i]->is_selected()) were_selected = true;
-                    }
-                    if (!were_selected){
-                        this->pushButtons();
-                        this->initAnimal();
-                        this->initBaseMenu();
-                    }
-                }
-                break;
+                    break;
+                case sf::Event::KeyPressed:
+                    if (this->ev.key.code == sf::Keyboard::Escape)
+                        this->window->close();
+                    else if (this->ev.key.code == sf::Keyboard::Space)
+                        isInMenu = !isInMenu;
+                    break;
+            }
         }
     }
 }
 
 void Game::update() {
-    if(is_connected) updateEnemy();
+
     mouse.set_x(sf::Mouse::getPosition(*this->window).x);
     mouse.set_y(sf::Mouse::getPosition(*this->window).y);
     this->pollEvents();
-    area.setPosition(mouse_0.get_x(), mouse_0.get_y());
-    float size_x = mouse.get_x() - mouse_0.get_x();
-    float size_y = mouse.get_y() - mouse_0.get_y();
-    area.setSize(sf::Vector2(size_x, size_y));
 
-    for(auto & animal : simple_animals){
-        for (auto bullet : bullets){
-            if (bullet->pos.distance(animal->pos) < animal->size){
-                bullet->hit(animal);
-                if (animal->get_energy() < 0) delete animal;
+    if(not isInMenu) {
+        if (is_connected) updateEnemy();
+        mouse.set_x(sf::Mouse::getPosition(*this->window).x);
+        mouse.set_y(sf::Mouse::getPosition(*this->window).y);
+        this->pollEvents();
+        area.setPosition(mouse_0.get_x(), mouse_0.get_y());
+        float size_x = mouse.get_x() - mouse_0.get_x();
+        float size_y = mouse.get_y() - mouse_0.get_y();
+        area.setSize(sf::Vector2(size_x, size_y));
+
+        for (auto &animal : simple_animals) {
+            for (auto bullet : bullets) {
+                if (bullet->pos.distance(animal->pos) < animal->size) {
+                    bullet->hit(animal);
+                    if (animal->get_energy() < 0) delete animal;
+                }
             }
-        }
-        if(!animal->stable) animal->move();
-        if(animal->pos.get_x() < animal->size) animal->set_pos(Point(animal->size*1.5, animal->pos.get_y()));
-        if(animal->pos.get_x() > width - animal->size) animal->set_pos(Point(width - animal->size*1.5, animal->pos.get_y()));
-        if(animal->pos.get_y() < animal->size) animal->set_pos(Point(animal->pos.get_x() ,animal->size*1.5));
-        if(animal->pos.get_y() > height - animal->size) animal->set_pos(Point(animal->pos.get_x(), height - animal->size*1.5));
-        for(auto & another_animal : simple_animals) {
-            double dist = animal->pos.distance(another_animal->pos);
-            if (dist < animal->size * 2 and dist != 0) {
-                Point pos = animal->pos;
-                Point another_pos = another_animal->pos;
-                animal->pos.set_x(pos.get_x() - animal->get_speed() * pos.delta_x(another_pos) / pos.distance(another_pos));
-                animal->pos.set_y(pos.get_y() - animal->get_speed() * pos.delta_y(another_pos) / pos.distance(another_pos));
-                if(!animal->stable) {
-                    another_animal->pos.set_x(
-                            another_pos.get_x() - animal->get_speed() * another_pos.delta_x(pos) / another_pos.distance(pos));
-                    another_animal->pos.set_y(
-                            another_pos.get_y() - animal->get_speed() * another_pos.delta_y(pos) / another_pos.distance(pos));
+            if (!animal->stable) animal->move();
+            if (animal->pos.get_x() < animal->size) animal->set_pos(Point(animal->size * 1.5, animal->pos.get_y()));
+            if (animal->pos.get_x() > width - animal->size)
+                animal->set_pos(Point(width - animal->size * 1.5, animal->pos.get_y()));
+            if (animal->pos.get_y() < animal->size) animal->set_pos(Point(animal->pos.get_x(), animal->size * 1.5));
+            if (animal->pos.get_y() > height - animal->size)
+                animal->set_pos(Point(animal->pos.get_x(), height - animal->size * 1.5));
+            for (auto &another_animal : simple_animals) {
+                double dist = animal->pos.distance(another_animal->pos);
+                if (dist < animal->size * 2 and dist != 0) {
+                    Point pos = animal->pos;
+                    Point another_pos = another_animal->pos;
+                    animal->pos.set_x(
+                            pos.get_x() - animal->get_speed() * pos.delta_x(another_pos) / pos.distance(another_pos));
+                    animal->pos.set_y(
+                            pos.get_y() - animal->get_speed() * pos.delta_y(another_pos) / pos.distance(another_pos));
+                    if (!animal->stable) {
+                        another_animal->pos.set_x(
+                                another_pos.get_x() -
+                                animal->get_speed() * another_pos.delta_x(pos) / another_pos.distance(pos));
+                        another_animal->pos.set_y(
+                                another_pos.get_y() -
+                                animal->get_speed() * another_pos.delta_y(pos) / another_pos.distance(pos));
+                    }
+                }
+            }
+            for (auto &another_animal : enemy_animals) {
+                for (auto bullet : bullets) {
+                    if (bullet->pos.distance(another_animal->pos) < another_animal->size) {
+                        bullet->hit(another_animal);
+                        if (another_animal->get_energy() < 0) delete another_animal;
+                    }
+                }
+                double dist = animal->pos.distance(another_animal->pos);
+                if (dist < animal->size * 2 and dist != 0) {
+                    Point pos = animal->pos;
+                    Point another_pos = another_animal->pos;
+                    animal->pos.set_x(
+                            pos.get_x() - animal->get_speed() * pos.delta_x(another_pos) / pos.distance(another_pos));
+                    animal->pos.set_y(
+                            pos.get_y() - animal->get_speed() * pos.delta_y(another_pos) / pos.distance(another_pos));
+                    if (!animal->stable) {
+                        another_animal->pos.set_x(
+                                another_pos.get_x() -
+                                animal->get_speed() * another_pos.delta_x(pos) / another_pos.distance(pos));
+                        another_animal->pos.set_y(
+                                another_pos.get_y() -
+                                animal->get_speed() * another_pos.delta_y(pos) / another_pos.distance(pos));
+                    }
                 }
             }
         }
-        for(auto & another_animal : enemy_animals) {
-            for (auto bullet : bullets){
-                if (bullet->pos.distance(another_animal->pos) < another_animal->size){
-                    bullet->hit(another_animal);
-                    if (another_animal->get_energy() < 0) delete another_animal;
-                }
-            }
-            double dist = animal->pos.distance(another_animal->pos);
-            if (dist < animal->size * 2 and dist != 0) {
-                Point pos = animal->pos;
-                Point another_pos = another_animal->pos;
-                animal->pos.set_x(pos.get_x() - animal->get_speed() * pos.delta_x(another_pos) / pos.distance(another_pos));
-                animal->pos.set_y(pos.get_y() - animal->get_speed() * pos.delta_y(another_pos) / pos.distance(another_pos));
-                if(!animal->stable) {
-                    another_animal->pos.set_x(
-                            another_pos.get_x() - animal->get_speed() * another_pos.delta_x(pos) / another_pos.distance(pos));
-                    another_animal->pos.set_y(
-                            another_pos.get_y() - animal->get_speed() * another_pos.delta_y(pos) / another_pos.distance(pos));
-                }
-            }
-        }
+
+        if (mouse.get_x() >= 0 and mouse.get_y() >= 0 and mouse.get_x() <= this->videoMode.width and
+            mouse.get_y() <= this->videoMode.height) {
+            this->cursor.setFillColor(sf::Color::Red);
+            this->cursor.setPosition(mouse.get_x(), mouse.get_y());
+            this->board.energy_lvl.setSize(sf::Vector2(energy * 10.f, (height / 30) * 1.f));
+        } else this->cursor.setFillColor(sf::Color::Green);
+
+
+    } else{
+
     }
-
-    if (mouse.get_x() >= 0 and mouse.get_y() >= 0 and mouse.get_x() <= this->videoMode.width and mouse.get_y() <= this->videoMode.height){
-        this->cursor.setFillColor(sf::Color::Red);
-        this->cursor.setPosition(mouse.get_x(), mouse.get_y());
-        this->board.energy_lvl.setSize(sf::Vector2(energy*10.f, (height/30)*1.f));
-    }
-    else this->cursor.setFillColor(sf::Color::Green);
-
-    if (board.spawn_base.pushed == 1) board.spawn_base.picture.setFillColor(sf::Color::Red);
-    else board.spawn_base.picture.setFillColor(sf::Color::Green);
-
 }
 
 void Game::render() {
-    window->clear(sf::Color(5, 0, 90, 255));
-    window->draw(this->board.board);
-    window->draw(this->board.energy_lvl_back);
-    window->draw(this->board.energy_lvl);
-    window->draw(this->board.energy_lvl_caption);
-    window->draw(this->board.spawn_base.picture);
-    window->draw(this->cursor);
+    if(not isInMenu) {
+        window->clear(sf::Color(5, 0, 90, 255));
+        window->draw(this->board.board);
+        window->draw(this->board.energy_lvl_back);
+        window->draw(this->board.energy_lvl);
+        window->draw(this->board.energy_lvl_caption);
+        window->draw(this->board.spawn_base.picture);
+        window->draw(this->cursor);
 
 
-    for(auto & base : bases){
-        this->window->draw(base.picture);
-        if (base.is_selected){
-            this->window->draw(base.menu.picture);
+        for (auto &base : bases) {
+            this->window->draw(base.picture);
+            if (base.is_selected) {
+                this->window->draw(base.menu.picture);
+            }
         }
-    }
-    for(auto & animal : simple_animals) {
-        if (animal->is_selected()) animal->picture.setFillColor(red);
-        else animal->picture.setFillColor(green);
-        animal->picture.setPosition(animal->pos.get_x(), animal->pos.get_y());
-        window->draw(animal->picture);
-    }
-    for(auto & animal : enemy_animals) {
-        window->draw(animal->picture);
-    }
+        for (auto &animal : simple_animals) {
+            if (animal->is_selected()) animal->picture.setFillColor(red);
+            else animal->picture.setFillColor(green);
+            animal->picture.setPosition(animal->pos.get_x(), animal->pos.get_y());
+            window->draw(animal->picture);
+        }
+        for (auto &animal : enemy_animals) {
+            window->draw(animal->picture);
+        }
 
-    window->draw(this->area);
+        window->draw(this->area);
+    } else{
+        window->clear(sf::Color(60, 0, 90, 255));
+    }
     this->window->display();
 }
 
@@ -764,18 +804,95 @@ bool Game::connect_to_server() {
     return is_connected;
 }
 
+class MainMenu
+{
+public:
+    //Private variables
+    sf::RenderWindow* window{};
+    sf::VideoMode videoMode;
+    sf::Event ev{};
+    sf::RectangleShape newGameButton;
+    Point mouse;
+    std::string choice = "0";
+
+
+    void pollEvents() {
+            while (this->window->pollEvent(this->ev)) {
+                switch (this->ev.type) {
+                    case sf::Event::Closed:
+                        this->window->close();
+                        break;
+                    case sf::Event::KeyPressed:
+                        if (this->ev.key.code == sf::Keyboard::Escape)
+                            this->window->close();
+                        else if (this->ev.key.code == sf::Keyboard::Enter)
+                            //choice = "start new game";
+                        break;
+
+                    case sf::Event::MouseButtonPressed:
+                        if (this->ev.mouseButton.button == sf::Mouse::Left) {
+                        if(abs(mouse.get_x() - newGameButton.getPosition().x) < newGameButton.getSize().x/2 and
+                                abs(mouse.get_y() - newGameButton.getPosition().y) < newGameButton.getSize().y/2){
+                            choice = "start new game";
+                        }
+                        }
+                        break;
+
+            }
+        }
+    }
+
+    void update() {
+        mouse.set_x(sf::Mouse::getPosition(*this->window).x);
+        mouse.set_y(sf::Mouse::getPosition(*this->window).y);
+        this->pollEvents();
+    }
+
+    void render(){
+        window->clear(sf::Color(60, 100, 90, 255));
+        window->draw(newGameButton);
+        window->display();
+    }
+
+    MainMenu() {
+        window = nullptr;
+        videoMode.height = height;
+        videoMode.width = width;
+        window = new sf::RenderWindow(videoMode, "Chillness 1.1.3", sf::Style::Titlebar | sf::Style::Fullscreen);
+        window->setFramerateLimit(40);
+
+        newGameButton.setSize(sf::Vector2(width/5, height/7));
+        newGameButton.setOrigin(sf::Vector2(width/10, height/14));
+        newGameButton.setPosition(width/2, height/3);
+
+    }
+    ~MainMenu(){
+        delete window;
+    }
+};
+
 //------------------------------------------------------GAME LOOP-------------------------------------------------------
-    int main() {
-        font.loadFromFile("/home/egor/Repositories/Chillness/20443.otf");
+int main() {
+    font.loadFromFile("/home/egor/Repositories/Chillness/20443.otf");
+
+    MainMenu mm;
+
+    while (mm.choice == "0"){
+        mm.update();
+        mm.render();
+    }
+    std::string choice = mm.choice;
+    mm.window->close();
 //Init Game
+    if(choice == "start new game") {
         Game game;
 //Game loop
-        while(game.running())
-        {
+        while (game.running()) {
 //Update
             game.update();
 //Render
             game.render();
         }
-        return 0;
     }
+    return 0;
+}
