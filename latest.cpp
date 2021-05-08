@@ -19,7 +19,7 @@ float width = sf::VideoMode::getDesktopMode().width;
 float base_size = (float)width / 32;
 int energy = 100;
 vector<int> price_of_animal = {0, 5, 10, 30};
-int selected_type = 0; //1 - simple, 2 - shouter
+int selected_type = 1; //1 - simple, 2 - shouter
 sf::Font font;
 sf::Color green = sf::Color::Green;
 sf::Color red = sf::Color::Red;
@@ -244,6 +244,7 @@ public:
     sf::RectangleShape picture;
     sf::Color color;
     Point pos;
+    sf::Text caption;
 };
 
 //Base class--------------------------------------------------------
@@ -256,6 +257,7 @@ public:
     int num_of_animals;
     bool is_selected = false;
     int radius;
+    int power = 0;
 
     explicit Base(Point pos_){
         pos = pos_;
@@ -284,11 +286,14 @@ struct button{
 };
 //Board structure-----------------------------------------------------
 struct Board{
+    sf::RectangleShape chosen_type;
     sf::RectangleShape energy_lvl;
     sf::RectangleShape energy_lvl_back;
     sf::RectangleShape board;
     button spawn_base;
     sf::Text energy_lvl_caption;
+    sf::CircleShape type_1;
+    sf::CircleShape type_2;
 };
 
 //Game class--------------------------------------------------------
@@ -419,7 +424,6 @@ void Game::pollEvents() {
                             if (simple_animals[i]->is_selected()) were_selected = true;
                         }
                         if (!were_selected) {
-                            this->pushButtons();
                             this->initAnimal();
                             this->initBaseMenu();
                         }
@@ -451,6 +455,9 @@ void Game::update() {
     this->pollEvents();
 
     if(not isInMenu) {
+
+        board.chosen_type.setPosition(width * (5 + selected_type) / 15, height * 29 / 30);
+
         if (is_connected) updateEnemy();
         mouse.set_x(sf::Mouse::getPosition(*this->window).x);
         mouse.set_y(sf::Mouse::getPosition(*this->window).y);
@@ -536,18 +543,27 @@ void Game::update() {
 void Game::render() {
     if(not isInMenu) {
         window->clear(sf::Color(5, 0, 90, 255));
-        window->draw(this->board.board);
-        window->draw(this->board.energy_lvl_back);
-        window->draw(this->board.energy_lvl);
-        window->draw(this->board.energy_lvl_caption);
-        window->draw(this->board.spawn_base.picture);
-        window->draw(this->cursor);
+        window->draw(board.board);
+        window->draw(board.energy_lvl_back);
+        window->draw(board.energy_lvl);
+        window->draw(board.energy_lvl_caption);
+        window->draw(board.spawn_base.picture);
+        window->draw(board.chosen_type);
+        window->draw(board.type_1);
+        window->draw(board.type_2);
+        window->draw(cursor);
 
 
         for (auto &base : bases) {
-            this->window->draw(base.picture);
+            window->draw(base.picture);
             if (base.is_selected) {
-                this->window->draw(base.menu.picture);
+                window->draw(base.menu.picture);
+                base.menu.caption.setCharacterSize(height / 30);
+                base.menu.caption.setFont(font);
+                base.menu.caption.setPosition(width * 5 / 6, height * 18 / 19);
+                base.menu.caption.setFillColor(red);
+                base.menu.caption.setString("lvl " + std::to_string(base.power));
+                window->draw(base.menu.caption);
             }
         }
         for (auto &animal : simple_animals) {
@@ -599,10 +615,21 @@ void Game::initBoard() {
     board.board.setSize(sf::Vector2(width*1.f, (height/15)*1.f));
     board.board.setFillColor(sf::Color::White);
 
-    //this->board.spawn_base.picture.setPosition(1725, 1445);
-    //this->board.spawn_base.picture.setSize(sf::Vector2(50.f, 50.f));
-    //this->board.spawn_base.picture.setFillColor(sf::Color::Green);
-    //this->board.spawn_base.picture.setOrigin(25,25);
+    board.chosen_type.setSize(sf::Vector2(width/35, height/20));
+    board.chosen_type.setOrigin(width/70, height/40);
+    board.chosen_type.setFillColor(sf::Color(0, 0, 0, 0));
+    board.chosen_type.setOutlineColor(green);
+    board.chosen_type.setOutlineThickness(6);
+
+    board.type_1.setRadius(width/120);
+    board.type_1.setOrigin(width/120, width/120);
+    board.type_1.setFillColor(green);
+    board.type_1.setPosition(width * 6 / 15, height * 29 / 30);
+
+    board.type_2.setRadius(width/100);
+    board.type_2.setOrigin(width/100, width/100);
+    board.type_2.setFillColor(green);
+    board.type_2.setPosition(width * 7 / 15, height * 29 / 30);
 }
 
 void Game::initBase() {
@@ -621,12 +648,14 @@ void Game::initBaseMenu(){
         bases[i].is_selected = false;
         if (bases[i].is_in_base(a)){
             menu_.picture.setFillColor(sf::Color(255, 255, 255, 150));
-            menu_.picture.setSize(sf::Vector2f(width / 4, height / 4));
+            menu_.picture.setSize(sf::Vector2f(width / 4, height / 15));
             menu_.picture.setOutlineColor(sf::Color::Red);
             menu_.picture.setOutlineThickness(5);
-            menu_.picture.setPosition(width * 3 / 4, height * 3 / 4);
+            menu_.picture.setPosition(width * 3 / 4, height * 14 / 15);
             bases[i].menu = menu_;
             bases[i].is_selected = true;
+
+
         }
     }
 }
@@ -665,13 +694,13 @@ void Game::initAnimal() {
                 Point aim_ = position;
                 switch (selected_type) {
                     case 1: {
-                        auto beast = new Simple_Animal(100, 10, (int)(width / 192), aim_, position);
+                        auto beast = new Simple_Animal(100, 10, (int)(width / 500), aim_, position);
                         beast->draw();
                         simple_animals.push_back(beast);
                         break;
                     }
                     case 2: {
-                        auto beast = new Shouter_Animal(100, 10, (int)(width / 192), aim_, position);
+                        auto beast = new Shouter_Animal(100, 10, (int)(width / 500), aim_, position);
                         beast->draw();
                         simple_animals.push_back(beast);
                         break;
@@ -683,13 +712,6 @@ void Game::initAnimal() {
         }
     }
 
-void Game::pushButtons() {
-        if (mouse.get_x() >= 0 and mouse.get_y() >= 0 and mouse.get_x() <= this->videoMode.width and mouse.get_y() <= this->videoMode.height
-            and abs(mouse.get_x() - board.spawn_base.picture.getPosition().x) < board.spawn_base.picture.getSize().x/2 and
-            abs(mouse.get_y() - board.spawn_base.picture.getPosition().y) < board.spawn_base.picture.getSize().y/2){
-            this->board.spawn_base.pushed = !this->board.spawn_base.pushed;
-        }
-    }
 
 void Game::box (){
     Point a1 = mouse;
@@ -815,6 +837,8 @@ public:
     Point mouse;
     std::string choice = "0";
 
+    sf::Text newGameCaption;
+
 
     void pollEvents() {
             while (this->window->pollEvent(this->ev)) {
@@ -851,6 +875,7 @@ public:
     void render(){
         window->clear(sf::Color(60, 100, 90, 255));
         window->draw(newGameButton);
+        window->draw(newGameCaption);
         window->display();
     }
 
@@ -861,10 +886,17 @@ public:
         window = new sf::RenderWindow(videoMode, "Chillness 1.1.3", sf::Style::Titlebar | sf::Style::Fullscreen);
         window->setFramerateLimit(40);
 
-        newGameButton.setSize(sf::Vector2(width/5, height/7));
-        newGameButton.setOrigin(sf::Vector2(width/10, height/14));
+        newGameButton.setSize(sf::Vector2(width/4, height/10));
+        newGameButton.setOrigin(sf::Vector2(width/8, height/19));
         newGameButton.setPosition(width/2, height/3);
 
+
+        newGameCaption.setCharacterSize(height / 30);
+        newGameCaption.setFont(font);
+        newGameCaption.setOrigin(width/15, 0);
+        newGameCaption.setPosition(width/2, height * 9 / 30);
+        newGameCaption.setFillColor(red);
+        newGameCaption.setString("new game");
     }
     ~MainMenu(){
         delete window;
@@ -873,7 +905,7 @@ public:
 
 //------------------------------------------------------GAME LOOP-------------------------------------------------------
 int main() {
-    font.loadFromFile("/home/egor/Repositories/Chillness/20443.otf");
+    font.loadFromFile("/home/egorchan/Chillnes2.0/font_1.ttf");
 
     MainMenu mm;
 
