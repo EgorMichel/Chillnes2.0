@@ -90,7 +90,7 @@ public:
         pos.set_y(floor(pos.get_y() + speed * pos.delta_y(aim) / (pos.distance(aim) + 1)));
     }
     virtual void draw() = 0;
-    virtual void attack(Animal* opponent) = 0;
+    virtual void attack() = 0;
     virtual void capture(Base* base) = 0;
     int get_energy() const{return energy;}
     int get_strength() const{return strength;}
@@ -181,13 +181,14 @@ public:
         size = width / 120;
         type = 1;
     }
-    void attack(Animal* opponent) final;
+    void attack() final;
     void capture(Base* base) final;
     void draw() final;
 };
 
 vector<Animal*> simple_animals = {};
-vector<Animal*> enemy_animals = {};
+auto a = new Simple_Animal(100, 10, (int)(width / 500), Point(100, 100), Point(100, 100));
+vector<Animal*> enemy_animals = {a};
 vector<Bullet*> bullets = {};
 
 void Simple_Animal::draw() {
@@ -199,12 +200,15 @@ void Simple_Animal::draw() {
     this->picture.setOutlineColor(white);
 }
 
-void Simple_Animal::attack(Animal* opponent){
-    opponent->set_energy(opponent->get_energy() - strength);
-    energy -= opponent->get_strength();
-    if (energy < 0){
-        delete this;
-    }
+void Simple_Animal::attack(){
+    for (auto opponent : enemy_animals)
+        if (pos.distance(opponent->pos) < size + opponent->size){
+            opponent->set_energy(opponent->get_energy() - strength);
+            energy -= opponent->get_strength();
+            if (energy < 0){
+                delete this;
+            }
+        }
 }
 
 void Simple_Animal::capture(Base* base){
@@ -222,7 +226,7 @@ public:
         size = width / 100;
         type = 2;
     }
-    void attack(Animal* opponent) final;
+    void attack() final;
     void capture(Base* base) final;
     void draw() final;
 };
@@ -236,8 +240,17 @@ void Shouter_Animal::draw() {
     this->picture.setOutlineColor(white);
 }
 
-void Shouter_Animal::attack(Animal *opponent) {
+void Shouter_Animal::attack() {
     if (!stable) return;
+    double shortest_distance = 999999;
+    Animal* opponent;
+    for (auto enemy : enemy_animals){
+        double temp = pos.distance(enemy->pos);
+        if (temp < shortest_distance){
+            shortest_distance = temp;
+            opponent = enemy;
+        }
+    }
     Point aim_ = opponent->pos;
     auto bullet = new Bullet(20, 50, 255, pos, aim_);
     bullets.push_back(bullet);
@@ -484,7 +497,7 @@ void Game::update() {
     this->pollEvents();
 
     if(not isInMenu) {
-        if(energy <= 99.99) energy += 0.01;
+        if(energy <= 99.9) energy += 0.1;
         board.chosen_type.setPosition(width * (5 + selected_type) / 15, height * 29 / 30);
 
         if (is_connected) updateEnemy();
@@ -503,6 +516,7 @@ void Game::update() {
                 }
             }
             if (!animal->stable) animal->move();
+            animal->attack();
             if (animal->pos.get_x() < animal->size) animal->set_pos(Point(animal->size * 1.5, animal->pos.get_y()));
             if (animal->pos.get_x() > width - animal->size)
                 animal->set_pos(Point(width - animal->size * 1.5, animal->pos.get_y()));
