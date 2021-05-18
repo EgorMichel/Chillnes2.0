@@ -135,8 +135,8 @@ public:
         lifetime = lifetime_;
         pos = pos_;
         aim = aim_;
-        cosinus = pos.delta_x(aim) / pos.distance(aim);
-        sinus = pos.delta_y(aim) / pos.distance(aim);
+        cosinus = pos.delta_x(aim) / (pos.distance(aim) + 1);
+        sinus = pos.delta_y(aim) / (pos.distance(aim) + 1);
         this->picture.setRadius(5);
         this->picture.setPosition(this->pos.get_x(), this->pos.get_y());
         this->picture.setOrigin(5, 5);
@@ -190,8 +190,7 @@ public:
 };
 
 vector<Animal*> simple_animals = {};
-auto a = new Simple_Animal(100, 10, (int)(width / 500), Point(100, 100), Point(100, 100));
-vector<Animal*> enemy_animals = {a};
+vector<Animal*> enemy_animals = {};
 vector<Bullet*> bullets = {};
 
 void Simple_Animal::draw() {
@@ -383,7 +382,7 @@ void Game::initVariables() {
 void Game::initWindow() {
     this->videoMode.height = height;
     this->videoMode.width = width;
-    this->window = new sf::RenderWindow(this->videoMode, "Chillness 1.1.3", sf::Style::Titlebar | sf::Style::Fullscreen);
+    this->window = new sf::RenderWindow(this->videoMode, "Chillness", sf::Style::Titlebar | sf::Style::Fullscreen);
     this->window->setFramerateLimit(40);
 
 }
