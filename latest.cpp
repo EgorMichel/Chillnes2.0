@@ -190,8 +190,7 @@ public:
 };
 
 vector<Animal*> simple_animals = {};
-auto a = new Simple_Animal(100, 10, (int)(width / 500), Point(100, 100), Point(100, 100));
-vector<Animal*> enemy_animals = {a};
+vector<Animal*> enemy_animals = {};
 vector<Bullet*> bullets = {};
 
 void Simple_Animal::draw() {
