@@ -8,6 +8,7 @@
 #include <SFML/Network.hpp>
 #include <string>
 
+
 using std::vector;
 using std::cout;
 using std::endl;
@@ -17,7 +18,7 @@ using std::endl;
 float height = sf::VideoMode::getDesktopMode().height;
 float width = sf::VideoMode::getDesktopMode().width;
 float base_size = (float)width / 32;
-int energy = 100;
+double energy = 100;
 vector<int> price_of_animal = {0, 5, 10, 30};
 int selected_type = 1; //1 - simple, 2 - shouter
 sf::Font font;
@@ -301,7 +302,6 @@ class Game
 {
 private:
     //Private variables
-    sf::RenderWindow* window{};
     sf::VideoMode videoMode;
     sf::Event ev{};
     sf::RectangleShape cursor;
@@ -316,6 +316,8 @@ private:
     size_t received{};
     bool is_connected = false;
     bool isInMenu = false;
+    sf::RectangleShape goToMM;
+    sf::Text goToMMCaption;
 
     //Private functions
     void initVariables();
@@ -323,6 +325,8 @@ private:
     void initCursor();
 
 public:
+    bool readyToStart = false;
+    sf::RenderWindow* window{};
     //Public functions
     void initBoard();
     Game();
@@ -345,7 +349,7 @@ public:
 
 //Functions definitions:
 void Game::initVariables() {
-    this->window = nullptr;
+    window = nullptr;
 }
 
 void Game::initWindow() {
@@ -357,11 +361,11 @@ void Game::initWindow() {
 }
 
 Game::~Game() {
-    delete this->window;
+    delete window;
 }
 
 Game::Game() {
-    connect_to_server();
+    //connect_to_server();
     initVariables();
     initWindow();
     initCursor();
@@ -393,7 +397,9 @@ void Game::pollEvents() {
                     else if (ev.key.code == sf::Keyboard::Space)
                         isInMenu = !isInMenu;
                     break;
+
                 case sf::Event::MouseButtonPressed:
+
                     if (ev.mouseButton.button == sf::Mouse::Left) {
                         for (int i = 0; i < simple_animals.size(); i++) {
                             if (simple_animals[i]->is_selected()) {
@@ -434,13 +440,20 @@ void Game::pollEvents() {
     } else {
         while (this->window->pollEvent(this->ev)) {
             switch (this->ev.type) {
+                case sf::Event::MouseButtonPressed:
+                    if (this->ev.mouseButton.button == sf::Mouse::Left) {
+                        if (abs(mouse.get_x() - goToMM.getPosition().x) < goToMM.getSize().x / 2 and
+                            abs(mouse.get_y() - goToMM.getPosition().y) < goToMM.getSize().y / 2) {
+                            window->close();
+                        }
+                    }
+                        break;
+
                 case sf::Event::Closed:
                     this->window->close();
                     break;
                 case sf::Event::KeyPressed:
-                    if (this->ev.key.code == sf::Keyboard::Escape)
-                        this->window->close();
-                    else if (this->ev.key.code == sf::Keyboard::Space)
+                    if (this->ev.key.code == sf::Keyboard::Space)
                         isInMenu = !isInMenu;
                     break;
             }
@@ -455,12 +468,11 @@ void Game::update() {
     this->pollEvents();
 
     if(not isInMenu) {
-
+        if(energy <= 99.99) energy += 0.01;
         board.chosen_type.setPosition(width * (5 + selected_type) / 15, height * 29 / 30);
 
         if (is_connected) updateEnemy();
-        mouse.set_x(sf::Mouse::getPosition(*this->window).x);
-        mouse.set_y(sf::Mouse::getPosition(*this->window).y);
+
         this->pollEvents();
         area.setPosition(mouse_0.get_x(), mouse_0.get_y());
         float size_x = mouse.get_x() - mouse_0.get_x();
@@ -531,7 +543,7 @@ void Game::update() {
             mouse.get_y() <= this->videoMode.height) {
             this->cursor.setFillColor(sf::Color::Red);
             this->cursor.setPosition(mouse.get_x(), mouse.get_y());
-            this->board.energy_lvl.setSize(sf::Vector2(energy * 10.f, (height / 30) * 1.f));
+            this->board.energy_lvl.setSize(sf::Vector2(float(energy * width/300), (height / 30)));
         } else this->cursor.setFillColor(sf::Color::Green);
 
 
@@ -579,6 +591,8 @@ void Game::render() {
         window->draw(this->area);
     } else{
         window->clear(sf::Color(60, 0, 90, 255));
+        window->draw(goToMM);
+        window->draw(goToMMCaption);
     }
     this->window->display();
 }
@@ -597,6 +611,17 @@ void Game::initCursor() {
 }
 
 void Game::initBoard() {
+    goToMM.setSize(sf::Vector2(width/4, height/10));
+    goToMM.setOrigin(sf::Vector2(width/8, height/19));
+    goToMM.setPosition(width/2, height/3);
+
+    goToMMCaption.setCharacterSize(height / 30);
+    goToMMCaption.setFont(font);
+    goToMMCaption.setOrigin(width/15, 0);
+    goToMMCaption.setPosition(width/2, height * 9 / 30);
+    goToMMCaption.setFillColor(red);
+    goToMMCaption.setString("main menu");
+
     board.energy_lvl.setPosition(0, height*0.95);
     board.energy_lvl.setSize(sf::Vector2((width/10)*1.f,  (height/30)*1.f));
     board.energy_lvl.setFillColor(sf::Color::Blue);
@@ -646,7 +671,10 @@ void Game::initBaseMenu(){
     Point a = mouse;
     for (int i = 0; i < 7; i++){
         bases[i].is_selected = false;
+        bases[i].picture.setOutlineThickness(0);
         if (bases[i].is_in_base(a)){
+            bases[i].picture.setOutlineThickness(5);
+            bases[i].picture.setOutlineColor(red);
             menu_.picture.setFillColor(sf::Color(255, 255, 255, 150));
             menu_.picture.setSize(sf::Vector2f(width / 4, height / 15));
             menu_.picture.setOutlineColor(sf::Color::Red);
@@ -833,12 +861,20 @@ public:
     sf::RenderWindow* window{};
     sf::VideoMode videoMode;
     sf::Event ev{};
-    sf::RectangleShape newGameButton;
     Point mouse;
     std::string choice = "0";
 
+    sf::RectangleShape newGameButton;
     sf::Text newGameCaption;
 
+    sf::RectangleShape aboutButton;
+    sf::Text aboutButtonCaption;
+
+    sf::RectangleShape exitButton;
+    sf::Text exitCaption;
+
+    sf::Text loadingCaption;
+    bool loading = false;
 
     void pollEvents() {
             while (this->window->pollEvent(this->ev)) {
@@ -855,10 +891,18 @@ public:
 
                     case sf::Event::MouseButtonPressed:
                         if (this->ev.mouseButton.button == sf::Mouse::Left) {
-                        if(abs(mouse.get_x() - newGameButton.getPosition().x) < newGameButton.getSize().x/2 and
-                                abs(mouse.get_y() - newGameButton.getPosition().y) < newGameButton.getSize().y/2){
-                            choice = "start new game";
-                        }
+                            if(abs(mouse.get_x() - newGameButton.getPosition().x) < newGameButton.getSize().x/2 and
+                            abs(mouse.get_y() - newGameButton.getPosition().y) < newGameButton.getSize().y/2){
+                                choice = "start new game";
+                            }
+                            if(abs(mouse.get_x() - aboutButton.getPosition().x) < aboutButton.getSize().x/2 and
+                                    abs(mouse.get_y() - aboutButton.getPosition().y) < aboutButton.getSize().y/2){
+                                choice = "about";
+                            }
+                            if(abs(mouse.get_x() - exitButton.getPosition().x) < exitButton.getSize().x/2 and
+                                    abs(mouse.get_y() - exitButton.getPosition().y) < exitButton.getSize().y/2){
+                                choice = "exit";
+                            }
                         }
                         break;
 
@@ -876,6 +920,11 @@ public:
         window->clear(sf::Color(60, 100, 90, 255));
         window->draw(newGameButton);
         window->draw(newGameCaption);
+        window->draw(aboutButton);
+        window->draw(aboutButtonCaption);
+        window->draw(exitButton);
+        window->draw(exitCaption);
+        if(loading) window->draw(loadingCaption);
         window->display();
     }
 
@@ -890,13 +939,43 @@ public:
         newGameButton.setOrigin(sf::Vector2(width/8, height/19));
         newGameButton.setPosition(width/2, height/3);
 
-
         newGameCaption.setCharacterSize(height / 30);
         newGameCaption.setFont(font);
         newGameCaption.setOrigin(width/15, 0);
         newGameCaption.setPosition(width/2, height * 9 / 30);
         newGameCaption.setFillColor(red);
         newGameCaption.setString("new game");
+
+        aboutButton.setSize(sf::Vector2(width/4, height/10));
+        aboutButton.setOrigin(sf::Vector2(width/8, height/19));
+        aboutButton.setPosition(width/2, height * 15 / 30);
+
+        aboutButtonCaption.setCharacterSize(height / 30);
+        aboutButtonCaption.setFont(font);
+        aboutButtonCaption.setOrigin(width/13, 0);
+        aboutButtonCaption.setPosition(width/2, height * 14 / 30);
+        aboutButtonCaption.setFillColor(red);
+        aboutButtonCaption.setString("about game");
+
+        exitButton.setSize(sf::Vector2(width/4, height/10));
+        exitButton.setOrigin(sf::Vector2(width/8, height/19));
+        exitButton.setPosition(width/2, height * 20 / 30);
+
+        exitCaption.setCharacterSize(height / 30);
+        exitCaption.setFont(font);
+        exitCaption.setOrigin(width/37, 0);
+        exitCaption.setPosition(width/2, height * 19 / 30);
+        exitCaption.setFillColor(red);
+        exitCaption.setString("exit");
+
+        loadingCaption.setCharacterSize(height / 30);
+        loadingCaption.setFont(font);
+        loadingCaption.setOrigin(width/37, 0);
+        loadingCaption.setPosition(width/2, height * 24 / 30);
+        loadingCaption.setFillColor(red);
+        loadingCaption.setString("loading...");
+
+
     }
     ~MainMenu(){
         delete window;
@@ -906,25 +985,41 @@ public:
 //------------------------------------------------------GAME LOOP-------------------------------------------------------
 int main() {
     font.loadFromFile("/home/egorchan/Chillnes2.0/font_1.ttf");
+    while (true){
+        MainMenu mm;
+        mm.choice = "0";
+        while (mm.choice == "0") {
+            mm.update();
+            mm.render();
+            }
 
-    MainMenu mm;
+    //Init Game
+            if (mm.choice == "start new game") {
+                mm.loading = true;
+                mm.window->close();
+                Game * game = new Game();
+                /*while (not game->readyToStart){
+                    cout << mm.loading;
+                    mm.render();
+                }*/
 
-    while (mm.choice == "0"){
-        mm.update();
-        mm.render();
-    }
-    std::string choice = mm.choice;
-    mm.window->close();
-//Init Game
-    if(choice == "start new game") {
-        Game game;
-//Game loop
-        while (game.running()) {
-//Update
-            game.update();
-//Render
-            game.render();
+
+
+    //Game loop
+                while (game->running()) {
+    //Update
+                    game->update();
+    //Render
+                    game->render();
+                }
+                simple_animals.clear();
+                enemy_animals.clear();
+                bullets.clear();
+                energy = 100;
+
+                delete game;
+            }
+           else if(mm.choice == "exit") break;
         }
-    }
     return 0;
 }
