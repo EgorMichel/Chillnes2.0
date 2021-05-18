@@ -86,8 +86,8 @@ public:
     virtual ~Animal() = default;
     void move() {
         if(pos.distance(aim) < this->size*2) stable = true;
-        pos.set_x(floor(pos.get_x() + speed * pos.delta_x(aim) / pos.distance(aim)));
-        pos.set_y(floor(pos.get_y() + speed * pos.delta_y(aim) / pos.distance(aim)));
+        pos.set_x(floor(pos.get_x() + speed * pos.delta_x(aim) / (pos.distance(aim) + 1)));
+        pos.set_y(floor(pos.get_y() + speed * pos.delta_y(aim) / (pos.distance(aim) + 1)));
     }
     virtual void draw() = 0;
     virtual void attack(Animal* opponent) = 0;
@@ -115,7 +115,6 @@ public:
 protected:
     int energy, strength, price, speed, type;
     bool selected;
-
 };
 
 class Bullet{
@@ -145,7 +144,16 @@ public:
     void move(){
         pos.set_x(pos.get_x() + speed * cosinus);
         pos.set_y(pos.get_y() + speed * sinus);
-        lifetime -= 1;
+        lifetime -= 10;
+        if (lifetime < 0) delete this;
+    }
+    void draw(){
+        this->picture.setRadius(this->size);
+        this->picture.setPosition(this->pos.get_x(), this->pos.get_y());
+        this->picture.setOrigin(this->size, this->size);
+        this->picture.setFillColor(this->color);
+        this->picture.setOutlineThickness(0);
+        this->picture.setOutlineColor(white);
     }
     ~Bullet() = default;
     void hit(Animal* animal){
@@ -155,6 +163,7 @@ public:
     Point pos;
     Point aim;
     sf::CircleShape picture;
+    int size = width / 192;
 };
 
 //Animal types:
@@ -203,8 +212,7 @@ void Simple_Animal::capture(Base* base){
 
 
 //Shouter_Animal
-class Shouter_Animal: public Animal
-{
+class Shouter_Animal: public Animal{
 public:
     Shouter_Animal(int energy_, int strength_, int speed_, Point aim_, Point pos_):
             Animal(energy_, strength_, speed_, aim_, pos_){
@@ -229,7 +237,9 @@ void Shouter_Animal::draw() {
 }
 
 void Shouter_Animal::attack(Animal *opponent) {
-    auto bullet = new Bullet(20, 50, 255, pos, aim);
+    if (!stable) return;
+    Point aim_ = opponent->pos;
+    auto bullet = new Bullet(20, 50, 255, pos, aim_);
     bullets.push_back(bullet);
 }
 
@@ -396,14 +406,20 @@ void Game::pollEvents() {
                         selected_type = 3;
                     else if (ev.key.code == sf::Keyboard::Space)
                         isInMenu = !isInMenu;
+                    else if (ev.key.code == sf::Keyboard::S)
+                        for (auto animal : simple_animals){
+                            if (animal->is_selected())
+                                animal->aim = animal->pos;
+                        }
+
                     break;
 
                 case sf::Event::MouseButtonPressed:
 
                     if (ev.mouseButton.button == sf::Mouse::Left) {
-                        for (int i = 0; i < simple_animals.size(); i++) {
-                            if (simple_animals[i]->is_selected()) {
-                                simple_animals[i]->select(false);
+                        for (auto & simple_animal : simple_animals) {
+                            if (simple_animal->is_selected()) {
+                                simple_animal->select(false);
                             }
                         }
                         for (auto animal : simple_animals) {
@@ -414,10 +430,10 @@ void Game::pollEvents() {
                         area.setFillColor(sf::Color(200, 0, 100, 100));
                     }
                     if (ev.mouseButton.button == sf::Mouse::Right) {
-                        for (int i = 0; i < simple_animals.size(); i++) {
-                            if (simple_animals[i]->is_selected()) {
-                                simple_animals[i]->set_aim(Point(mouse.get_x(), mouse.get_y()));
-                                simple_animals[i]->stable = false;
+                        for (auto & simple_animal : simple_animals) {
+                            if (simple_animal->is_selected()) {
+                                simple_animal->set_aim(Point(mouse.get_x(), mouse.get_y()));
+                                simple_animal->stable = false;
                             }
                         }
                     }
@@ -426,8 +442,8 @@ void Game::pollEvents() {
                 case sf::Event::MouseButtonReleased:
                     if (this->ev.mouseButton.button == sf::Mouse::Left) {
                         this->box();
-                        for (int i = 0; i < simple_animals.size(); i++) {
-                            if (simple_animals[i]->is_selected()) were_selected = true;
+                        for (auto & simple_animal : simple_animals) {
+                            if (simple_animal->is_selected()) were_selected = true;
                         }
                         if (!were_selected) {
                             this->initAnimal();
@@ -984,7 +1000,7 @@ public:
 
 //------------------------------------------------------GAME LOOP-------------------------------------------------------
 int main() {
-    font.loadFromFile("/home/egorchan/Chillnes2.0/font_1.ttf");
+    font.loadFromFile("/home/egor/Рабочий стол/Repositories/Chillnes2.0");
     while (true){
         MainMenu mm;
         mm.choice = "0";
