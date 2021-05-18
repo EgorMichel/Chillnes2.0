@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <vector>
 #include <cmath>
+#include <ctime>
 #include <random>
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
@@ -82,6 +83,7 @@ public:
         price = 0;
         size = width / 120;
         type = 0;
+        time_flag = clock();
     }
     virtual ~Animal() = default;
     void move() {
@@ -112,6 +114,7 @@ public:
     sf::Color color;
     Point pos, aim = pos;
     int size;
+    long int time_flag;
 protected:
     int energy, strength, price, speed, type;
     bool selected;
@@ -201,6 +204,7 @@ void Simple_Animal::draw() {
 }
 
 void Simple_Animal::attack(){
+    if (clock() - time_flag < long(CLOCKS_PER_SEC * 0.5)) return;
     for (auto opponent : enemy_animals)
         if (pos.distance(opponent->pos) < size + opponent->size){
             opponent->set_energy(opponent->get_energy() - strength);
@@ -241,6 +245,7 @@ void Shouter_Animal::draw() {
 }
 
 void Shouter_Animal::attack() {
+    if (clock() - time_flag < long (CLOCKS_PER_SEC * 1)) return;
     if (!stable) return;
     double shortest_distance = 999999;
     Animal* opponent;
