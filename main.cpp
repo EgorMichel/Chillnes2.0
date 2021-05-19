@@ -548,8 +548,8 @@ void Game::initAnimal() {
 
 void Game::pushButtons() {
         if (mouse.get_x() >= 0 and mouse.get_y() >= 0 and mouse.get_x() <= this->videoMode.width and mouse.get_y() <= this->videoMode.height
-            and abs(mouse.get_x() - board.spawn_base.picture.getPosition().x) < board.spawn_base.picture.getSize().x/2 and
-            abs(mouse.get_y() - board.spawn_base.picture.getPosition().y) < board.spawn_base.picture.getSize().y/2){
+            and std::abs(mouse.get_x() - board.spawn_base.picture.getPosition().x) < board.spawn_base.picture.getSize().x/2 and
+            std::abs(mouse.get_y() - board.spawn_base.picture.getPosition().y) < board.spawn_base.picture.getSize().y/2){
             this->board.spawn_base.pushed = !this->board.spawn_base.pushed;
         }
     }
