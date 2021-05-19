@@ -181,7 +181,10 @@ void Bullet::move(){
     pos.set_x(pos.get_x() + speed * cosinus);
     pos.set_y(pos.get_y() + speed * sinus);
     this->picture.setPosition(pos.get_x(), pos.get_y());
-    if (clock() - time_flag > lifetime * CLOCKS_PER_SEC) delete this;
+    if (clock() - time_flag > lifetime * CLOCKS_PER_SEC) {
+        auto iterator = std::find(bullets.begin(), bullets.end(), this);
+        bullets.erase(iterator);
+    }
 }
 
 void Bullet::hit(Animal* animal){
@@ -200,7 +203,7 @@ public:
     Simple_Animal(int energy_, int strength_, int speed_, Point aim_, Point pos_):
             Animal(energy_, strength_, speed_, aim_, pos_){
         price = 15;
-        strength = 10;
+        strength = strength_;
         speed = speed_;
         size = width / 120;
         type = 1;
@@ -222,7 +225,7 @@ void Simple_Animal::draw() {
 void Simple_Animal::attack(){
     if (clock() - time_flag < long(CLOCKS_PER_SEC * 0.5)) return;
     for (auto opponent : enemy_animals)
-        if (pos.distance(opponent->pos) < size + opponent->size){
+        if (pos.distance(opponent->pos) < 1.5 * (size + opponent->size)){
             energy -= opponent->get_strength();
         }
     time_flag = clock();
@@ -237,8 +240,8 @@ class Shouter_Animal: public Animal{
 public:
     Shouter_Animal(int energy_, int strength_, int speed_, Point aim_, Point pos_):
             Animal(energy_, strength_, speed_, aim_, pos_){
-        price = 25;
-        strength = 5;
+        price = 30;
+        strength = strength_;
         speed = speed_;
         size = width / 100;
         type = 2;
@@ -271,7 +274,7 @@ void Shouter_Animal::attack() {
             }
         }
         Point aim_ = enemy_animals[index]->pos;
-        auto bullet = new Bullet(int(width / 10), 50, 2, pos, aim_);
+        auto bullet = new Bullet(int(width / 10), strength, 2, pos, aim_);
         bullets.push_back(bullet);
         time_flag = clock();
     }
