@@ -33,6 +33,13 @@ sf::Color white = sf::Color::White;
 
 
 class Base;
+class Animal;
+class Bullet;
+
+vector<Animal*> simple_animals = {};
+vector<Animal*> enemy_animals = {};
+vector<Bullet*> bullets = {};
+vector<Bullet*> enemy_bullets = {};
 
 //Point class
 class Point{
@@ -120,6 +127,7 @@ public:
 protected:
     int energy, strength, price, speed, type;
     bool selected;
+    bool ally = true;
 };
 
 
@@ -132,6 +140,7 @@ protected:
     sf::Color color = sf::Color(0, 0, 0);
     double cosinus;
     double sinus;
+    bool ally = true;
 public:
     Bullet(int speed_, int damage_, int lifetime_, Point pos_, Point aim_){
         speed = speed_;
@@ -142,28 +151,48 @@ public:
         aim = aim_;
         cosinus = pos.delta_x(aim) / pos.distance(aim);
         sinus = pos.delta_y(aim) / pos.distance(aim);
-        this->picture.setRadius(5);
-        this->picture.setPosition(this->pos.get_x(), this->pos.get_y());
-        this->picture.setOrigin(5, 5);
-        this->picture.setFillColor(this->color);
-        this->picture.setOutlineThickness(0);
-        this->picture.setOutlineColor(white);
     }
-    void move(){
-        pos.set_x(pos.get_x() + speed * cosinus);
-        pos.set_y(pos.get_y() + speed * sinus);
-        if (clock() - time_flag > lifetime * CLOCKS_PER_SEC) delete this;
-    }
-    ~Bullet() = default;
-    void hit(Animal* animal){
-        animal->set_energy(animal->get_energy() - damage);
-        delete this;
-    }
+    void move();
+    void draw();
+    ~Bullet();
+    void hit(Animal* animal);
     Point pos;
     Point aim;
     sf::CircleShape picture;
     int size = width / 192;
 };
+
+void Bullet::draw(){
+    this->picture.setRadius(size);
+    this->picture.setPosition(pos.get_x(), pos.get_y());
+    this->picture.setOrigin(size, size);
+    this->picture.setFillColor(this->color);
+    this->picture.setOutlineThickness(0);
+    this->picture.setOutlineColor(white);
+}
+
+void Bullet::move(){
+    pos.set_x(pos.get_x() + speed * cosinus);
+    pos.set_y(pos.get_y() + speed * sinus);
+    if (clock() - time_flag > lifetime * CLOCKS_PER_SEC) delete this;
+}
+
+void Bullet::hit(Animal* animal){
+    animal->set_energy(animal->get_energy() - damage);
+    delete this;
+}
+
+Bullet::~Bullet(){
+    if (ally){
+        auto iterator = std::find(bullets.begin(), bullets.end(), this);
+        bullets.erase(iterator);
+    }
+    else{
+        auto iterator = std::find(enemy_bullets.begin(), enemy_bullets.end(), this);
+        enemy_bullets.erase(iterator);
+    }
+    delete this;
+}
 
 //Animal types:
 
@@ -184,10 +213,6 @@ public:
     void capture(Base* base) final;
     void draw() final;
 };
-
-vector<Animal*> simple_animals = {};
-vector<Animal*> enemy_animals = {};
-vector<Bullet*> bullets = {};
 
 void Simple_Animal::draw() {
     picture.setRadius(this->size);

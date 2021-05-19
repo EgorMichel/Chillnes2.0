@@ -702,6 +702,10 @@ int main() {
                 mm.loading = true;
                 mm.window->close();
                 Game * game = new Game();
+                /*while (not game->readyToStart){
+                    cout << mm.loading;
+                    mm.render();
+                }*/
 
 
 
