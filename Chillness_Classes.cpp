@@ -190,12 +190,12 @@ vector<Animal*> enemy_animals = {};
 vector<Bullet*> bullets = {};
 
 void Simple_Animal::draw() {
-    this->picture.setRadius(this->size);
-    this->picture.setPosition(this->get_pos().get_x(), this->get_pos().get_y());
-    this->picture.setOrigin(this->size, this->size);
-    this->picture.setFillColor(this->color);
-    this->picture.setOutlineThickness(0);
-    this->picture.setOutlineColor(white);
+    picture.setRadius(this->size);
+    picture.setPosition(this->get_pos().get_x(), this->get_pos().get_y());
+    picture.setOrigin(this->size, this->size);
+    picture.setFillColor(this->color);
+    picture.setOutlineThickness(0);
+    picture.setOutlineColor(white);
 }
 
 void Simple_Animal::attack(){
@@ -320,3 +320,13 @@ struct Board{
     sf::CircleShape type_1;
     sf::CircleShape type_2;
 };
+
+std :: string read(int &k, char* buffer){
+    std:: string b = "";
+    while (buffer[k] != '_'){
+        b += buffer[k];
+        k++;
+    }
+    k++;
+    return b;
+}

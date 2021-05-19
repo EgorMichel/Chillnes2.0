@@ -481,9 +481,9 @@ void Game::sendInfo() {
     text = std::to_string(simple_animals.size());
     text += '_';
     for(int i = 0; i < simple_animals.size(); i++){
-        text += std::to_string(int(simple_animals[i]->pos.get_x() / width));
+        text += std::to_string(int(10000 * simple_animals[i]->pos.get_x() / width));
         text += '_';
-        text += std::to_string(int(simple_animals[i]->pos.get_y() / width));
+        text += std::to_string(int(10000 * simple_animals[i]->pos.get_y() / width));
         text += '_';
         text += std::to_string(simple_animals[i]->get_type());
         text += '_';
@@ -491,9 +491,9 @@ void Game::sendInfo() {
     text += std::to_string(bullets.size());
     text += '_';
     for(int i = 0; i < bullets.size(); i++){
-        text += std::to_string(int(bullets[i]->pos.get_x() / width));
+        text += std::to_string(int(10000 * bullets[i]->pos.get_x() / width));
         text += '_';
-        text += std::to_string(int(bullets[i]->pos.get_y() / width));
+        text += std::to_string(int(10000 * bullets[i]->pos.get_y() / width));
         text += '_';
     }
     socket.send(text.c_str(), text.length() + 1);
@@ -504,86 +504,37 @@ void Game::receiveInfo() {
     char buffer[2000];
     socket.receive(buffer, sizeof(buffer), received);
     int number_of_enemies, number_of_bullets;
-
-    std::string b = "";
     int k = 0;
-    while (buffer[k] != '_'){
-        b += buffer[k];
-        k++;
-    }
-    number_of_enemies = stoi(b);
+    number_of_enemies = stoi(read(k, buffer));
     for(int i = 0; i < number_of_enemies; i++){
         Point pos;
-        int type = 0;
-        k++;
-        b = "";
-        while (buffer[k] != '_'){
-            b += buffer[k];
-            k++;
-        }
-        pos.set_x(stoi(b) * width);
-        k++;
-        b = "";
-        while (buffer[k] != '_'){
-            b += buffer[k];
-            k++;
-        }
-        pos.set_y(stoi(b) * width);
-        k++;
-        b = "";
-        while (buffer[k] != '_'){
-            b += buffer[k];
-            k++;
-        }
-        type = stoi(b);
+        int type;
+        pos.set_x(stoi(read(k, buffer)) * width / 10000);
+        pos.set_y(stoi(read(k, buffer)) * width / 10000);
+        type = stoi(read(k, buffer));
 
         if (type == 1) {
             auto enemy = new Simple_Animal(energy, 100, 5, pos, pos);
-            enemy->picture.setFillColor(sf::Color::Cyan);
-            enemy->picture.setRadius(width/120);
-            enemy->picture.setOrigin(width/120, width/120);
-            enemy->picture.setPosition(pos.get_x(), pos.get_y());
+            enemy->color = sf::Color::Cyan;
+            enemy->draw();
             enemy_animals.push_back(enemy);
 
         }
         else if (type == 2) {
-            auto enemy = new Simple_Animal(energy, 100, 5, pos, pos);
-            enemy->picture.setFillColor(sf::Color::Cyan);
-            enemy->picture.setRadius(width/100);
-            enemy->picture.setOrigin(width/100, width/100);
-            enemy->picture.setPosition(pos.get_x(), pos.get_y());
+            auto enemy = new Shouter_Animal(energy, 100, 5, pos, pos);
+            enemy->color = sf::Color::Cyan;
+            enemy->draw();
             enemy_animals.push_back(enemy);
         }
     }
-    k++;
-    b = "";
-    while (buffer[k] != '_'){
-        b += buffer[k];
-        k++;
-    }
-    number_of_bullets = stoi(b);
+    number_of_bullets = stoi(read(k, buffer));
     for(int i = 0; i < number_of_bullets; i++) {
         Point pos;
-        int type = 0;
-        k++;
-        b = "";
-        while (buffer[k] != '_') {
-            b += buffer[k];
-            k++;
-        }
-        pos.set_x(stoi(b) * width);
-        k++;
-        b = "";
-        while (buffer[k] != '_') {
-            b += buffer[k];
-            k++;
-        }
-        pos.set_y(stoi(b) * width);
-
+        pos.set_x(stoi(read(k, buffer)) * width / 10000);
+        pos.set_y(stoi(read(k, buffer)) * width / 10000);
         Bullet b = Bullet(100, 100, 100, pos, pos);
         bullets.push_back(&b);
     }
-
 }
 
 bool Game::connect_to_server() {
@@ -751,10 +702,6 @@ int main() {
                 mm.loading = true;
                 mm.window->close();
                 Game * game = new Game();
-                /*while (not game->readyToStart){
-                    cout << mm.loading;
-                    mm.render();
-                }*/
 
 
 
