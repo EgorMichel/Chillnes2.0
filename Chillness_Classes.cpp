@@ -185,6 +185,7 @@ void Bullet::draw(){
 void Bullet::move(){
     pos.set_x(pos.get_x() + speed * cosinus);
     pos.set_y(pos.get_y() + speed * sinus);
+    this->picture.setPosition(pos.get_x(), pos.get_y());
     if (clock() - time_flag > lifetime * CLOCKS_PER_SEC) delete this;
 }
 
@@ -280,15 +281,15 @@ void Shouter_Animal::attack() {
     if (!stable) return;
     if (not enemy_animals.empty()){
         double shortest_distance = 999999;
-        Animal* opponent;
-        for (auto enemy : enemy_animals){
-            double temp = pos.distance(enemy->pos);
+        int index = 0;
+        for (int i = 0; i < enemy_animals.size(); i++){
+            double temp = pos.distance(enemy_animals[i]->pos);
             if (temp < shortest_distance){
                 shortest_distance = temp;
-                opponent = enemy;
+                index = i;
             }
         }
-        Point aim_ = opponent->pos;
+        Point aim_ = enemy_animals[index]->pos;
         auto bullet = new Bullet(int(width / 10), 50, 2, pos, aim_);
         bullets.push_back(bullet);
     }

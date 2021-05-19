@@ -249,6 +249,10 @@ void Game::update() {
             }
         }
 
+        for (auto bullet : bullets){
+            bullet->move();
+        }
+
         if (mouse.get_x() >= 0 and mouse.get_y() >= 0 and mouse.get_x() <= this->videoMode.width and
             mouse.get_y() <= this->videoMode.height) {
             this->cursor.setFillColor(sf::Color::Red);
@@ -296,6 +300,12 @@ void Game::render() {
         }
         for (auto &animal : enemy_animals) {
             window->draw(animal->picture);
+        }
+        for (auto bullet : bullets){
+            window->draw(bullet->picture);
+        }
+        for (auto bullet : enemy_bullets){
+            window->draw(bullet->picture);
         }
 
         window->draw(this->area);
