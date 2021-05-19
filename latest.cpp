@@ -301,8 +301,8 @@ void Game::render() {
             }
         }
         for (auto &animal : simple_animals) {
-            if (animal->is_selected()) animal->picture.setFillColor(sf::Color(255, 0, 0, animal->get_energy() * 255/100));
-            else animal->picture.setFillColor(sf::Color(0, 255, 0, animal->get_energy() * 255/100));
+            if (animal->is_selected()) animal->picture.setFillColor(sf::Color(255, 0, 0, 255- animal->get_energy() * 255/100));
+            else animal->picture.setFillColor(sf::Color(0, 255, 0, 255 - animal->get_energy() * 255/100));
             animal->picture.setPosition(animal->pos.get_x(), animal->pos.get_y());
             window->draw(animal->picture);
         }
@@ -579,7 +579,7 @@ void Game::receiveInfo() {
         Point pos;
         pos.set_x(stoi(read(k, buffer)) * width / 10000);
         pos.set_y(stoi(read(k, buffer)) * width / 10000);
-        auto b = new Bullet(int(width / 19), 10, 10, pos, pos);
+        auto b = new Bullet(int(width / 192), 10, 10, pos, pos);
         b->ally = false;
         enemy_bullets.push_back(b);
     }
