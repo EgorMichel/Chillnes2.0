@@ -68,7 +68,7 @@ Game::~Game() {
 }
 
 Game::Game() {
-    //connect_to_server();
+    connect_to_server();
     initVariables();
     initWindow();
     initCursor();
@@ -481,28 +481,37 @@ void Game::sendInfo() {
     text = std::to_string(simple_animals.size());
     text += '_';
     for(int i = 0; i < simple_animals.size(); i++){
-        text += std::to_string(simple_animals[i]->pos.get_x());
+        text += std::to_string(int(simple_animals[i]->pos.get_x()));
         text += '_';
-        text += std::to_string(simple_animals[i]->pos.get_y());
+        text += std::to_string(int(simple_animals[i]->pos.get_y()));
         text += '_';
         text += std::to_string(simple_animals[i]->get_type());
+        text += '_';
+    }
+    text += std::to_string(bullets.size());
+    text += '_';
+    for(int i = 0; i < bullets.size(); i++){
+        text += std::to_string(int(bullets[i]->pos.get_x()));
+        text += '_';
+        text += std::to_string(int(bullets[i]->pos.get_y()));
         text += '_';
     }
     socket.send(text.c_str(), text.length() + 1);
 }
 
 void Game::receiveInfo() {
+    size_t received;
     char buffer[2000];
     socket.receive(buffer, sizeof(buffer), received);
-    int number_of_enemies;
+    int number_of_enemies, number_of_bullets;
+
     std::string b = "";
     int k = 0;
     while (buffer[k] != '_'){
         b += buffer[k];
         k++;
     }
-    number_of_enemies = std::stoi(b);
-
+    number_of_enemies = stoi(b);
     for(int i = 0; i < number_of_enemies; i++){
         Point pos;
         int type = 0;
@@ -512,50 +521,84 @@ void Game::receiveInfo() {
             b += buffer[k];
             k++;
         }
-        pos.set_x(std::stoi(b));
+        pos.set_x(stoi(b));
         k++;
         b = "";
         while (buffer[k] != '_'){
             b += buffer[k];
             k++;
         }
-        pos.set_y(std::stoi(b));
+        pos.set_y(stoi(b));
         k++;
         b = "";
         while (buffer[k] != '_'){
             b += buffer[k];
             k++;
         }
-        type = std::stoi(b);
-        switch (type) {
-            case 1:{
-                Simple_Animal enemy = Simple_Animal(energy, 100, 5, pos, pos);
-                enemy.color = sf::Color::Cyan;
-                enemy.draw();
-                enemy_animals.push_back(&enemy);
-            }
-            case 2:{
-                Shouter_Animal enemy = Shouter_Animal(energy, 100, 5, pos, pos);
-                enemy.color = sf::Color::Cyan;
-                enemy.draw();
-                enemy_animals.push_back(&enemy);
-            }
+        type = stoi(b);
+
+        if (type == 1) {
+            auto enemy = new Simple_Animal(energy, 100, 5, pos, pos);
+            enemy->picture.setFillColor(sf::Color::Cyan);
+            enemy->picture.setRadius(width/120);
+            enemy->picture.setOrigin(width/120, width/120);
+            enemy->picture.setPosition(pos.get_x(), pos.get_y());
+            enemy_animals.push_back(enemy);
+
         }
+        else if (type == 2) {
+            auto enemy = new Simple_Animal(energy, 100, 5, pos, pos);
+            enemy->picture.setFillColor(sf::Color::Cyan);
+            enemy->picture.setRadius(width/100);
+            enemy->picture.setOrigin(width/100, width/100);
+            enemy->picture.setPosition(pos.get_x(), pos.get_y());
+            enemy_animals.push_back(enemy);
+        }
+    }
+    k++;
+    b = "";
+    while (buffer[k] != '_'){
+        b += buffer[k];
+        k++;
+    }
+    number_of_bullets = stoi(b);
+    for(int i = 0; i < number_of_bullets; i++) {
+        Point pos;
+        int type = 0;
+        k++;
+        b = "";
+        while (buffer[k] != '_') {
+            b += buffer[k];
+            k++;
+        }
+        pos.set_x(stoi(b));
+        k++;
+        b = "";
+        while (buffer[k] != '_') {
+            b += buffer[k];
+            k++;
+        }
+        pos.set_y(stoi(b));
+
+        Bullet b = Bullet(100, 100, 100, pos, pos);
+        bullets.push_back(&b);
     }
 
 }
 
 bool Game::connect_to_server() {
+    size_t received;
     char buffer[2000];
     username = "Egor";
-    sf::IpAddress ip = "192.168.0.103";
+    sf::IpAddress ip = "10.55.128.181";
     sf::TcpSocket::Status connection = socket.connect(ip, 2000);
     if(connection == sf::Socket::Done) {
         is_connected = true;
+
         std::cout << ip << endl;
-        socket.receive(buffer, sizeof(buffer), received);
+
         socket.send(username.c_str(), username.length() + 1);
-        std::cout << buffer << endl;
+
         std::cout << "Waiting for the second player..." << endl;
         socket.receive(buffer, sizeof(buffer), received);
         std::cout << buffer << endl;
