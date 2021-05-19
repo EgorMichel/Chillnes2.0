@@ -5,6 +5,7 @@ class Game
 {
 private:
     //Private variables
+    float velocity = 0.1;
     sf::VideoMode videoMode;
     sf::Event ev{};
     sf::RectangleShape cursor;
@@ -15,8 +16,6 @@ private:
     std::string username;
     sf::TcpSocket socket;
     std::string text;
-    char mode = 's';
-    size_t received{};
     bool is_connected = false;
     bool isInMenu = false;
     sf::RectangleShape goToMM;
@@ -121,6 +120,14 @@ void Game::pollEvents() {
 
                         mouse_0 = mouse;
                         area.setFillColor(sf::Color(200, 0, 100, 100));
+
+                        if(abs(mouse.get_x() - board.upgrade_1.picture.getPosition().x) < board.upgrade_1.picture.getSize().x/2 and
+                           abs(mouse.get_y() - board.upgrade_1.picture.getPosition().y) < board.upgrade_1.picture.getSize().y/2){
+                            if( energy >= 30*velocity*4) {
+                                velocity += 0.1;
+                                energy -= 30 * velocity * 4;
+                            }
+                        }
                     }
                     if (ev.mouseButton.button == sf::Mouse::Right) {
                         for (auto & simple_animal : simple_animals) {
@@ -177,7 +184,7 @@ void Game::update() {
     this->pollEvents();
 
     if(not isInMenu) {
-        if(energy <= 99.9) energy += 0.1;
+        if(energy <= 100 - velocity) energy += velocity;
         board.chosen_type.setPosition(width * (5 + selected_type) / 15, height * 29 / 30);
 
         if (is_connected) updateEnemy();

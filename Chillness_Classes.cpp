@@ -292,6 +292,7 @@ void Shouter_Animal::attack() {
         Point aim_ = enemy_animals[index]->pos;
         auto bullet = new Bullet(int(width / 10), 50, 2, pos, aim_);
         bullets.push_back(bullet);
+        time_flag = clock();
     }
 }
 
