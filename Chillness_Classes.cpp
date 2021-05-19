@@ -180,7 +180,6 @@ void Bullet::draw(){
 void Bullet::move(){
     pos.set_x(pos.get_x() + speed * cosinus);
     pos.set_y(pos.get_y() + speed * sinus);
-    this->picture.setPosition(pos.get_x(), pos.get_y());
     if (clock() - time_flag > lifetime * CLOCKS_PER_SEC) {
         auto iterator = std::find(bullets.begin(), bullets.end(), this);
         bullets.erase(iterator);

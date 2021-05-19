@@ -310,6 +310,7 @@ void Game::render() {
             window->draw(animal->picture);
         }
         for (auto bullet : bullets){
+            bullet->draw();
             window->draw(bullet->picture);
         }
         for (auto bullet : enemy_bullets){
