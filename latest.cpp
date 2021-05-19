@@ -314,6 +314,7 @@ void Game::render() {
             window->draw(bullet->picture);
         }
         for (auto bullet : enemy_bullets){
+            bullet->draw();
             window->draw(bullet->picture);
         }
 
