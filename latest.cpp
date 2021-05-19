@@ -196,6 +196,7 @@ void Game::update() {
         area.setSize(sf::Vector2(size_x, size_y));
 
         for (auto &animal : simple_animals) {
+            animal->tact_counter += 1;
             for (auto bullet : enemy_bullets) {
                 if (bullet->pos.distance(animal->pos) < animal->size) {
                     bullet->hit(animal);
@@ -255,6 +256,7 @@ void Game::update() {
 
         for (auto bullet : bullets){
             bullet->move();
+            bullet->tact_counter += 1;
         }
 
         if (mouse.get_x() >= 0 and mouse.get_y() >= 0 and mouse.get_x() <= this->videoMode.width and

@@ -93,12 +93,12 @@ public:
         size = width / 120;
         type = 0;
         time_flag = clock();
+        tact_counter = 0;
     }
     virtual ~Animal(){
         if (ally) {
             auto iterator = std::find(simple_animals.begin(), simple_animals.end(), this);
             simple_animals.erase(iterator);
-            delete this;
         }
     }
     void move() {
@@ -131,6 +131,7 @@ public:
     int size;
     long int time_flag;
     bool ally = true;
+    int tact_counter = 0;
 protected:
     int energy, strength, price, speed, type;
     bool selected;
@@ -170,6 +171,7 @@ public:
 };
 
 void Bullet::draw(){
+    color.a = 255 - 155 * tact_counter / 40;  // may be laggy with higher energy values
     this->picture.setRadius(size);
     this->picture.setPosition(pos.get_x(), pos.get_y());
     this->picture.setOrigin(size, size);
@@ -212,6 +214,7 @@ public:
 };
 
 void Simple_Animal::draw() {
+    color.a = 105 + energy;  // may be laggy with higher energy values
     picture.setRadius(this->size);
     picture.setPosition(this->get_pos().get_x(), this->get_pos().get_y());
     picture.setOrigin(this->size, this->size);
@@ -221,12 +224,12 @@ void Simple_Animal::draw() {
 }
 
 void Simple_Animal::attack(){
-    if (clock() - time_flag < long(CLOCKS_PER_SEC * 0.5)) return;
+    if (tact_counter < 20) return;
     for (auto opponent : enemy_animals)
         if (pos.distance(opponent->pos) < 1.5 * (size + opponent->size)){
             energy -= opponent->get_strength();
         }
-    time_flag = clock();
+    tact_counter = 0;
 }
 
 void Simple_Animal::capture(Base* base){
@@ -247,10 +250,10 @@ public:
     void attack() final;
     void capture(Base* base) final;
     void draw() final;
-    int tact_counter = 0;
 };
 
 void Shouter_Animal::draw() {
+    color.a = 105 + energy;  // may be laggy with higher energy values
     this->picture.setRadius(this->size);
     this->picture.setPosition(this->get_pos().get_x(), this->get_pos().get_y());
     this->picture.setOrigin(this->size, this->size);
@@ -260,7 +263,7 @@ void Shouter_Animal::draw() {
 }
 
 void Shouter_Animal::attack() {
-    if (tact_counter > 40) return;
+    if (tact_counter < 40) return;
     if (!stable) return;
     if (not enemy_animals.empty()){
         double shortest_distance = 999999;
