@@ -166,6 +166,7 @@ public:
     sf::CircleShape picture;
     int size = width / 192;
     bool ally = true;
+    int tact_counter = 0;
 };
 
 void Bullet::draw(){
@@ -180,7 +181,7 @@ void Bullet::draw(){
 void Bullet::move(){
     pos.set_x(pos.get_x() + speed * cosinus);
     pos.set_y(pos.get_y() + speed * sinus);
-    if (clock() - time_flag > lifetime * CLOCKS_PER_SEC) {
+    if (tact_counter > lifetime) {
         auto iterator = std::find(bullets.begin(), bullets.end(), this);
         bullets.erase(iterator);
     }
@@ -246,6 +247,7 @@ public:
     void attack() final;
     void capture(Base* base) final;
     void draw() final;
+    int tact_counter = 0;
 };
 
 void Shouter_Animal::draw() {
@@ -258,7 +260,7 @@ void Shouter_Animal::draw() {
 }
 
 void Shouter_Animal::attack() {
-    if (clock() - time_flag < long (CLOCKS_PER_SEC * 0.1)) return;
+    if (tact_counter > 40) return;
     if (!stable) return;
     if (not enemy_animals.empty()){
         double shortest_distance = 999999;
@@ -271,9 +273,9 @@ void Shouter_Animal::attack() {
             }
         }
         Point aim_ = enemy_animals[index]->pos;
-        auto bullet = new Bullet(int(width / 192), strength, 2, pos, aim_);
+        auto bullet = new Bullet(int(width / 192), strength, 40, pos, aim_);
         bullets.push_back(bullet);
-        time_flag = clock();
+        tact_counter = 0;
     }
 }
 
