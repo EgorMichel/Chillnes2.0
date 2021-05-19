@@ -95,14 +95,9 @@ public:
         time_flag = clock();
     }
     virtual ~Animal(){
-        if (ally){
+        if (ally) {
             auto iterator = std::find(simple_animals.begin(), simple_animals.end(), this);
             simple_animals.erase(iterator);
-            delete this;
-        }
-        else{
-            auto iterator = std::find(enemy_animals.begin(), enemy_animals.end(), this);
-            enemy_animals.erase(iterator);
             delete this;
         }
     }

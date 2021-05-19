@@ -738,7 +738,7 @@ public:
 
 //------------------------------------------------------GAME LOOP-------------------------------------------------------
 int main() {
-    font.loadFromFile("/home/egor/Рабочий стол/Repositories/Chillnes2.0");
+    font.loadFromFile("/home/egor/Рабочий стол/Repositories/Chillnes2.0/font_1.ttf");
     while (true){
         MainMenu mm;
         mm.choice = "0";
