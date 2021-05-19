@@ -159,7 +159,7 @@ public:
     }
     void move();
     void draw();
-    ~Bullet();
+    ~Bullet() = default;
     void hit(Animal* animal);
     Point pos;
     Point aim;
@@ -186,19 +186,8 @@ void Bullet::move(){
 
 void Bullet::hit(Animal* animal){
     animal->set_energy(animal->get_energy() - damage);
-    delete this;
-}
-
-Bullet::~Bullet(){
-    if (ally){
-        auto iterator = std::find(bullets.begin(), bullets.end(), this);
-        bullets.erase(iterator);
-    }
-    else{
-        auto iterator = std::find(enemy_bullets.begin(), enemy_bullets.end(), this);
-        enemy_bullets.erase(iterator);
-    }
-    delete this;
+    auto iterator = std::find(bullets.begin(), bullets.end(), this);
+    bullets.erase(iterator);
 }
 
 //Animal types:
@@ -234,12 +223,9 @@ void Simple_Animal::attack(){
     if (clock() - time_flag < long(CLOCKS_PER_SEC * 0.5)) return;
     for (auto opponent : enemy_animals)
         if (pos.distance(opponent->pos) < size + opponent->size){
-            opponent->set_energy(opponent->get_energy() - strength);
             energy -= opponent->get_strength();
-            if (energy < 0){
-                delete this;
-            }
         }
+    time_flag = clock();
 }
 
 void Simple_Animal::capture(Base* base){

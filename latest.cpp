@@ -196,11 +196,14 @@ void Game::update() {
         area.setSize(sf::Vector2(size_x, size_y));
 
         for (auto &animal : simple_animals) {
-            for (auto bullet : bullets) {
+            for (auto bullet : enemy_bullets) {
                 if (bullet->pos.distance(animal->pos) < animal->size) {
                     bullet->hit(animal);
-                    if (animal->get_energy() < 0) delete animal;
                 }
+            }
+            if (animal->get_energy() < 0){
+                auto iterator = std::find(simple_animals.begin(), simple_animals.end(), animal);
+                simple_animals.erase(iterator);
             }
             if (!animal->stable) animal->move();
             animal->attack();
@@ -230,12 +233,6 @@ void Game::update() {
                 }
             }
             for (auto &another_animal : enemy_animals) {
-                for (auto bullet : bullets) {
-                    if (bullet->pos.distance(another_animal->pos) < another_animal->size) {
-                        bullet->hit(another_animal);
-                        if (another_animal->get_energy() < 0) delete another_animal;
-                    }
-                }
                 double dist = animal->pos.distance(another_animal->pos);
                 if (dist < animal->size * 2 and dist != 0) {
                     Point pos = animal->pos;
