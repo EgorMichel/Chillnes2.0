@@ -278,6 +278,10 @@ void Game::render() {
         window->draw(board.type_1);
         window->draw(board.type_2);
         window->draw(cursor);
+        window->draw(board.upgrade_1.picture);
+        window->draw(board.upgrade_2.picture);
+        window->draw(board.upgrade_1.caption);
+        window->draw(board.upgrade_2.caption);
 
 
         for (auto &base : bases) {
@@ -362,7 +366,7 @@ void Game::initBoard() {
 
     board.chosen_type.setSize(sf::Vector2(width/35, height/20));
     board.chosen_type.setOrigin(width/70, height/40);
-    board.chosen_type.setFillColor(sf::Color(0, 0, 0, 0));
+    board.chosen_type.setFillColor(sf::Color(10, 0, 10, 0));
     board.chosen_type.setOutlineColor(green);
     board.chosen_type.setOutlineThickness(6);
 
@@ -375,6 +379,32 @@ void Game::initBoard() {
     board.type_2.setOrigin(width/100, width/100);
     board.type_2.setFillColor(green);
     board.type_2.setPosition(width * 7 / 15, height * 29 / 30);
+
+    board.upgrade_1.picture.setSize(sf::Vector2(width/20, height/20));
+    board.upgrade_1.picture.setOrigin(width/40, height/40);
+    board.upgrade_1.picture.setFillColor(sf::Color(green));
+    board.upgrade_1.picture.setOutlineColor(red);
+    board.upgrade_1.picture.setOutlineThickness(3);
+    board.upgrade_1.picture.setPosition(width * 9 / 15, height * 29 / 30);
+
+    board.upgrade_1.caption.setCharacterSize(height/30);
+    board.upgrade_1.caption.setFont(font);
+    board.upgrade_1.caption.setPosition(width * 9 / 15, height * 29 / 30);
+    board.upgrade_1.caption.setFillColor(red);
+    board.upgrade_1.caption.setString("speed up");
+
+    board.upgrade_2.picture.setSize(sf::Vector2(width/20, height/20));
+    board.upgrade_2.picture.setOrigin(width/40, height/40);
+    board.upgrade_2.picture.setFillColor(sf::Color(green));
+    board.upgrade_2.picture.setOutlineColor(red);
+    board.upgrade_2.picture.setOutlineThickness(3);
+    board.upgrade_2.picture.setPosition(width * 10 / 15, height * 29 / 30);
+
+    board.upgrade_2.caption.setCharacterSize(height/30);
+    board.upgrade_2.caption.setFont(font);
+    board.upgrade_2.caption.setPosition(width * 10 / 15, height * 29 / 30);
+    board.upgrade_2.caption.setFillColor(red);
+    board.upgrade_2.caption.setString("health up");
 }
 
 void Game::initBase() {
