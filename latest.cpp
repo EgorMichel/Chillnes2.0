@@ -301,8 +301,8 @@ void Game::render() {
             }
         }
         for (auto &animal : simple_animals) {
-            if (animal->is_selected()) animal->picture.setFillColor(red);
-            else animal->picture.setFillColor(green);
+            if (animal->is_selected()) animal->picture.setFillColor(sf::Color(255, 0, 0, animal->get_energy() * 255/100));
+            else animal->picture.setFillColor(sf::Color(0, 255, 0, animal->get_energy() * 255/100));
             animal->picture.setPosition(animal->pos.get_x(), animal->pos.get_y());
             window->draw(animal->picture);
         }
