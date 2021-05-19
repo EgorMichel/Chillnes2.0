@@ -95,12 +95,7 @@ public:
         time_flag = clock();
         tact_counter = 0;
     }
-    virtual ~Animal(){
-        if (ally) {
-            auto iterator = std::find(simple_animals.begin(), simple_animals.end(), this);
-            simple_animals.erase(iterator);
-        }
-    }
+    virtual ~Animal() = default;
     void move() {
         if(pos.distance(aim) < this->size*2) stable = true;
         pos.set_x(floor(pos.get_x() + speed * pos.delta_x(aim) / (pos.distance(aim) + 1)));
@@ -171,7 +166,8 @@ public:
 };
 
 void Bullet::draw(){
-    color.a = 255 - 155 * tact_counter / 40;  // may be laggy with higher energy values
+    if (ally)
+        color.a = 255 - 155 * tact_counter / 40;  // may be laggy with higher energy values
     this->picture.setRadius(size);
     this->picture.setPosition(pos.get_x(), pos.get_y());
     this->picture.setOrigin(size, size);
@@ -183,7 +179,7 @@ void Bullet::draw(){
 void Bullet::move(){
     pos.set_x(pos.get_x() + speed * cosinus);
     pos.set_y(pos.get_y() + speed * sinus);
-    if (tact_counter > lifetime) {
+    if (tact_counter > lifetime and ally) {
         auto iterator = std::find(bullets.begin(), bullets.end(), this);
         bullets.erase(iterator);
     }
@@ -214,7 +210,8 @@ public:
 };
 
 void Simple_Animal::draw() {
-    color.a = 105 + energy;  // may be laggy with higher energy values
+    if (ally)
+        color.a = 150 + energy;  // may be laggy with higher energy values
     picture.setRadius(this->size);
     picture.setPosition(this->get_pos().get_x(), this->get_pos().get_y());
     picture.setOrigin(this->size, this->size);
@@ -253,7 +250,8 @@ public:
 };
 
 void Shouter_Animal::draw() {
-    color.a = 105 + energy;  // may be laggy with higher energy values
+    if (ally)
+        color.a = 150 + energy;  // may be laggy with higher energy values
     this->picture.setRadius(this->size);
     this->picture.setPosition(this->get_pos().get_x(), this->get_pos().get_y());
     this->picture.setOrigin(this->size, this->size);
@@ -276,7 +274,7 @@ void Shouter_Animal::attack() {
             }
         }
         Point aim_ = enemy_animals[index]->pos;
-        auto bullet = new Bullet(int(width / 192), strength, 40, pos, aim_);
+        auto bullet = new Bullet(int(width / 192), strength, 20, pos, aim_);
         bullets.push_back(bullet);
         tact_counter = 0;
     }

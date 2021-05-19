@@ -198,7 +198,7 @@ void Game::update() {
         for (auto &animal : simple_animals) {
             animal->tact_counter += 1;
             for (auto bullet : enemy_bullets) {
-                if (bullet->pos.distance(animal->pos) < animal->size) {
+                if (bullet->pos.distance(animal->pos) < animal->size + bullet->size) {
                     bullet->hit(animal);
                 }
             }
@@ -254,10 +254,20 @@ void Game::update() {
             }
         }
 
+        for (auto enemy_animal : enemy_animals){
+            for (auto bullet : bullets){
+                if (bullet->pos.distance(enemy_animal->pos) < enemy_animal->size + bullet->size){
+                    auto iterator = std::find(bullets.begin(), bullets.end(), bullet);
+                    bullets.erase(iterator);
+                }
+            }
+        }
+
         for (auto bullet : bullets){
             bullet->move();
             bullet->tact_counter += 1;
         }
+
 
         if (mouse.get_x() >= 0 and mouse.get_y() >= 0 and mouse.get_x() <= this->videoMode.width and
             mouse.get_y() <= this->videoMode.height) {
@@ -520,6 +530,7 @@ void Game::box (){
 }
 
 void Game::updateEnemy() {
+    enemy_bullets.clear();
     enemy_animals.clear();
     sendInfo();
     receiveInfo();
@@ -592,7 +603,7 @@ bool Game::connect_to_server() {
     size_t received;
     char buffer[2000];
     username = "Egor";
-    sf::IpAddress ip = "10.55.128.181";
+    sf::IpAddress ip = "192.168.1.2"; //10.55.128.181
     sf::TcpSocket::Status connection = socket.connect(ip, 2000);
     if(connection == sf::Socket::Done) {
         is_connected = true;
