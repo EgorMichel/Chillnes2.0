@@ -481,9 +481,9 @@ void Game::sendInfo() {
     text = std::to_string(simple_animals.size());
     text += '_';
     for(int i = 0; i < simple_animals.size(); i++){
-        text += std::to_string(int(simple_animals[i]->pos.get_x()));
+        text += std::to_string(int(simple_animals[i]->pos.get_x() / width));
         text += '_';
-        text += std::to_string(int(simple_animals[i]->pos.get_y()));
+        text += std::to_string(int(simple_animals[i]->pos.get_y() / width));
         text += '_';
         text += std::to_string(simple_animals[i]->get_type());
         text += '_';
@@ -491,9 +491,9 @@ void Game::sendInfo() {
     text += std::to_string(bullets.size());
     text += '_';
     for(int i = 0; i < bullets.size(); i++){
-        text += std::to_string(int(bullets[i]->pos.get_x()));
+        text += std::to_string(int(bullets[i]->pos.get_x() / width));
         text += '_';
-        text += std::to_string(int(bullets[i]->pos.get_y()));
+        text += std::to_string(int(bullets[i]->pos.get_y() / width));
         text += '_';
     }
     socket.send(text.c_str(), text.length() + 1);
@@ -521,14 +521,14 @@ void Game::receiveInfo() {
             b += buffer[k];
             k++;
         }
-        pos.set_x(stoi(b));
+        pos.set_x(stoi(b) * width);
         k++;
         b = "";
         while (buffer[k] != '_'){
             b += buffer[k];
             k++;
         }
-        pos.set_y(stoi(b));
+        pos.set_y(stoi(b) * width);
         k++;
         b = "";
         while (buffer[k] != '_'){
@@ -571,14 +571,14 @@ void Game::receiveInfo() {
             b += buffer[k];
             k++;
         }
-        pos.set_x(stoi(b));
+        pos.set_x(stoi(b) * width);
         k++;
         b = "";
         while (buffer[k] != '_') {
             b += buffer[k];
             k++;
         }
-        pos.set_y(stoi(b));
+        pos.set_y(stoi(b) * width);
 
         Bullet b = Bullet(100, 100, 100, pos, pos);
         bullets.push_back(&b);
