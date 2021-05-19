@@ -188,8 +188,6 @@ void Bullet::move(){
 
 void Bullet::hit(Animal* animal){
     animal->set_energy(animal->get_energy() - damage);
-    auto iterator = std::find(bullets.begin(), bullets.end(), this);
-    bullets.erase(iterator);
 }
 
 //Animal types:
@@ -260,7 +258,7 @@ void Shouter_Animal::draw() {
 }
 
 void Shouter_Animal::attack() {
-    if (clock() - time_flag < long (CLOCKS_PER_SEC * 1)) return;
+    if (clock() - time_flag < long (CLOCKS_PER_SEC * 0.1)) return;
     if (!stable) return;
     if (not enemy_animals.empty()){
         double shortest_distance = 999999;
