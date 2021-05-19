@@ -94,7 +94,18 @@ public:
         type = 0;
         time_flag = clock();
     }
-    virtual ~Animal() = default;
+    virtual ~Animal(){
+        if (ally){
+            auto iterator = std::find(simple_animals.begin(), simple_animals.end(), this);
+            simple_animals.erase(iterator);
+            delete this;
+        }
+        else{
+            auto iterator = std::find(enemy_animals.begin(), enemy_animals.end(), this);
+            enemy_animals.erase(iterator);
+            delete this;
+        }
+    }
     void move() {
         if(pos.distance(aim) < this->size*2) stable = true;
         pos.set_x(floor(pos.get_x() + speed * pos.delta_x(aim) / (pos.distance(aim) + 1)));
@@ -124,10 +135,10 @@ public:
     Point pos, aim = pos;
     int size;
     long int time_flag;
+    bool ally = true;
 protected:
     int energy, strength, price, speed, type;
     bool selected;
-    bool ally = true;
 };
 
 
@@ -140,7 +151,6 @@ protected:
     sf::Color color = sf::Color(0, 0, 0);
     double cosinus;
     double sinus;
-    bool ally = true;
 public:
     Bullet(int speed_, int damage_, int lifetime_, Point pos_, Point aim_){
         speed = speed_;
@@ -160,6 +170,7 @@ public:
     Point aim;
     sf::CircleShape picture;
     int size = width / 192;
+    bool ally = true;
 };
 
 void Bullet::draw(){

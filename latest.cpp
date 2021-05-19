@@ -514,14 +514,16 @@ void Game::receiveInfo() {
         type = stoi(read(k, buffer));
 
         if (type == 1) {
-            auto enemy = new Simple_Animal(energy, 100, 5, pos, pos);
+            auto enemy = new Simple_Animal(100, 10, 5, pos, pos);
+            enemy->ally = false;
             enemy->color = sf::Color::Cyan;
             enemy->draw();
             enemy_animals.push_back(enemy);
 
         }
         else if (type == 2) {
-            auto enemy = new Shouter_Animal(energy, 100, 5, pos, pos);
+            auto enemy = new Shouter_Animal(100, 10, 5, pos, pos);
+            enemy->ally = false;
             enemy->color = sf::Color::Cyan;
             enemy->draw();
             enemy_animals.push_back(enemy);
@@ -532,8 +534,9 @@ void Game::receiveInfo() {
         Point pos;
         pos.set_x(stoi(read(k, buffer)) * width / 10000);
         pos.set_y(stoi(read(k, buffer)) * width / 10000);
-        Bullet b = Bullet(100, 100, 100, pos, pos);
-        bullets.push_back(&b);
+        auto b = new Bullet(int(width / 19), 10, 10, pos, pos);
+        b->ally = false;
+        enemy_bullets.push_back(b);
     }
 }
 
