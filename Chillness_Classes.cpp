@@ -82,7 +82,7 @@ double Point::distance(Point a) const{
 class Animal{
 public:
     Animal(int energy_, int strength_, int speed_, Point aim_, Point pos_){
-        energy = 0;
+        energy = energy_;
         strength = strength_;
         speed = speed_;
         aim = aim_;
