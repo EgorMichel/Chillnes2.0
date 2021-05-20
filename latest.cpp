@@ -102,7 +102,7 @@ void Game::pollEvents() {
                     else if (ev.key.code == sf::Keyboard::S)
                         for (auto animal : simple_animals){
                             if (animal->is_selected())
-                                animal->aim = animal->pos;
+                                animal->set_aim(animal->pos);
                         }
 
                     break;
@@ -148,10 +148,18 @@ void Game::pollEvents() {
                         }
                     }
                     if (ev.mouseButton.button == sf::Mouse::Right) {
-                        for (auto & simple_animal : simple_animals) {
-                            if (simple_animal->is_selected()) {
-                                simple_animal->set_aim(Point(mouse.get_x(), mouse.get_y()));
-                                simple_animal->stable = false;
+
+                        for (auto animal : simple_animals) {
+                            if (animal->is_selected()) {
+                                if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
+                                    std::cout<<"sosi"<<'\n';
+                                    animal->aims.push_back(Point(mouse.get_x(), mouse.get_y()));
+                                    animal->stable = false;
+                                }
+                                else{
+                                    animal->set_aim(Point(mouse.get_x(), mouse.get_y()));
+                                    animal->stable = false;
+                                }
                             }
                         }
                     }

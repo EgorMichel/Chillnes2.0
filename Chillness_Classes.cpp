@@ -85,7 +85,7 @@ public:
         energy = energy_;
         strength = strength_;
         speed = speed_;
-        aim = aim_;
+        aims.push_back(aim_);
         pos = pos_;
         color = green;
         selected = false;
@@ -96,7 +96,11 @@ public:
     }
     virtual ~Animal() = default;
     void move() {
-        if(pos.distance(aim) < this->size*2) stable = true;
+        Point aim = aims[0];
+        if(pos.distance(aim) < this->size*2) {
+            if (aims.size() == 1) stable = true;
+            aims.erase(aims.begin());
+        }
         pos.set_x(floor(pos.get_x() + speed * pos.delta_x(aim) / (pos.distance(aim) + 1)));
         pos.set_y(floor(pos.get_y() + speed * pos.delta_y(aim) / (pos.distance(aim) + 1)));
     }
@@ -115,11 +119,15 @@ public:
     void select(bool a) {selected = a;}
     Point get_pos() const {return pos;}
     void set_pos(Point a) {pos = a;}
-    void set_aim(Point a) {aim = a;}
+    void set_aim(Point a) {
+        aims.clear();
+        aims.push_back(a);
+    }
     sf::CircleShape picture;
     bool stable = true;
     sf::Color color;
-    Point pos, aim = pos;
+    Point pos;
+    vector<Point> aims = {};
     int size;
     bool ally = true;
     int tact_counter = 0, tact_counter2 = 0;
