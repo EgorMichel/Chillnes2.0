@@ -275,20 +275,18 @@ void Game::update() {
 
         }
 
-        for (auto enemy_animal : enemy_animals){
-            for (auto bullet : bullets){
-                if (bullet->pos.distance(enemy_animal->pos) < enemy_animal->size + bullet->size){
-                    auto iterator = std::find(bullets.begin(), bullets.end(), bullet);
-                    bullets.erase(iterator);
-                }
-            }
-        }
-
         for (auto i = 0; i < bullets.size(); i++){
             bullets[i]->move();
             bullets[i]->tact_counter += 1;
             if (bullets[i]->tact_counter > bullets[i]->lifetime) {
                 bullets.erase(bullets.begin() + i);
+                continue;
+            }
+            for (auto enemy_animal : enemy_animals){
+                if (bullets[i]->pos.distance(enemy_animal->pos) < bullets[i]->size + enemy_animal->size){
+                    bullets.erase(bullets.begin() + i);
+                    break;
+                }
             }
         }
 
