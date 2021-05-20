@@ -210,8 +210,9 @@ public:
 };
 
 void Simple_Animal::draw() {
-    if (ally)
-        color.a = 150 + energy;  // may be laggy with higher energy values
+//    if (ally)
+//        color.a = 150 + energy;  // may be laggy with higher energy value
+//    else color.a = 255;
     picture.setRadius(this->size);
     picture.setPosition(this->get_pos().get_x(), this->get_pos().get_y());
     picture.setOrigin(this->size, this->size);
@@ -250,8 +251,8 @@ public:
 };
 
 void Shouter_Animal::draw() {
-    if (ally)
-        color.a = 150 + energy;  // may be laggy with higher energy values
+//    if (ally)
+//        color.a = 150 + energy;  // may be laggy with higher energy values
     this->picture.setRadius(this->size);
     this->picture.setPosition(this->get_pos().get_x(), this->get_pos().get_y());
     this->picture.setOrigin(this->size, this->size);
@@ -276,6 +277,7 @@ void Shouter_Animal::attack() {
         Point aim_ = enemy_animals[index]->pos;
         auto bullet = new Bullet(int(width / 192), strength, 20, pos, aim_);
         bullets.push_back(bullet);
+        bullet->draw();
         tact_counter = 0;
     }
 }

@@ -336,8 +336,8 @@ void Game::render() {
             }
         }
         for (auto &animal : simple_animals) {
-            if (animal->is_selected()) animal->picture.setFillColor(sf::Color(255, 0, 0, 255- animal->get_energy() * 255/100));
-            else animal->picture.setFillColor(sf::Color(0, 255, 0, 255 - animal->get_energy() * 255/100));
+            if (animal->is_selected()) animal->picture.setFillColor(sf::Color(255, 0, 0, animal->get_energy() * 255/100));
+            else animal->picture.setFillColor(sf::Color(0, 255, 0, animal->get_energy() * 255/100));
             animal->picture.setPosition(animal->pos.get_x(), animal->pos.get_y());
             window->draw(animal->picture);
         }
@@ -345,11 +345,10 @@ void Game::render() {
             window->draw(animal->picture);
         }
         for (auto bullet : bullets){
-            bullet->draw();
+            bullet->picture.setPosition(bullet->pos.get_x(), bullet->pos.get_y());
             window->draw(bullet->picture);
         }
         for (auto bullet : enemy_bullets){
-            bullet->draw();
             window->draw(bullet->picture);
         }
 
@@ -634,6 +633,7 @@ void Game::receiveInfo() {
         pos.set_y(stoi(read(k, buffer)) * width / 10000);
         auto b = new Bullet(int(width / 192), 10, 10, pos, pos);
         b->ally = false;
+        b->draw();
         enemy_bullets.push_back(b);
     }
     int number_of_bases = stoi(read(k, buffer));
@@ -646,7 +646,7 @@ bool Game::connect_to_server() {
     size_t received;
     char buffer[2000];
     username = "Egor";
-    sf::IpAddress ip = "10.55.128.181"; //192.168.1.2
+    sf::IpAddress ip = "10.55.132.150"; //192.168.1.2  10.55.128.181  10.55.132.150 - Michel on miptng
     sf::TcpSocket::Status connection = socket.connect(ip, 2000);
     if(connection == sf::Socket::Done) {
         is_connected = true;
