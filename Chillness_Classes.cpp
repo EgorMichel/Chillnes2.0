@@ -179,10 +179,10 @@ void Bullet::draw(){
 void Bullet::move(){
     pos.set_x(pos.get_x() + speed * cosinus);
     pos.set_y(pos.get_y() + speed * sinus);
-    if (tact_counter > lifetime and ally) {
-        auto iterator = std::find(bullets.begin(), bullets.end(), this);
-        bullets.erase(iterator);
-    }
+//    if (tact_counter > lifetime) {
+//        auto iterator = std::find(bullets.begin(), bullets.end(), this);
+//        bullets.erase(iterator);
+//    }
 }
 
 void Bullet::hit(Animal* animal){
@@ -276,8 +276,8 @@ void Shouter_Animal::attack() {
         }
         Point aim_ = enemy_animals[index]->pos;
         auto bullet = new Bullet(int(width / 192), strength, 20, pos, aim_);
-        bullets.push_back(bullet);
         bullet->draw();
+        bullets.push_back(bullet);
         tact_counter = 0;
     }
 }
