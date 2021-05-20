@@ -179,12 +179,14 @@ void Bullet::draw(){
 }
 
 void Bullet::move(){
-    pos.set_x(pos.get_x() + speed * cosinus);
-    pos.set_y(pos.get_y() + speed * sinus);
-//    if (tact_counter > lifetime) {
-//        auto iterator = std::find(bullets.begin(), bullets.end(), this);
-//        bullets.erase(iterator);
-//    }
+    if (tact_counter > lifetime) {
+        auto iterator = std::find(bullets.begin(), bullets.end(), this);
+        bullets.erase(iterator);
+    }
+    else{
+        pos.set_x(pos.get_x() + speed * cosinus);
+        pos.set_y(pos.get_y() + speed * sinus);
+    }
 }
 
 void Bullet::hit(Animal* animal){
