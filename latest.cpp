@@ -6,7 +6,7 @@ class Game
 private:
     //Private variables
     int teamType;
-    float velocity = 0.1;
+    float velocity = 0.02;
     sf::VideoMode videoMode;
     sf::Event ev{};
     sf::RectangleShape cursor;
@@ -185,6 +185,15 @@ void Game::update() {
     this->pollEvents();
 
     if(not isInMenu) {
+
+        int number_of_our_bases = 0;
+        for(int i = 0; i < bases.size(); i++){
+            if (bases[i].teamType == teamType){
+                number_of_our_bases++;
+            }
+        }
+        velocity *= sqrt(number_of_our_bases);
+
         if(energy <= 100 - velocity) energy += velocity;
         board.chosen_type.setPosition(width * (5 + selected_type) / 15, height * 29 / 30);
 
