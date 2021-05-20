@@ -5,6 +5,7 @@ class Game
 {
 private:
     //Private variables
+    int teamType;
     float velocity = 0.1;
     sf::VideoMode videoMode;
     sf::Event ev{};
@@ -254,6 +255,25 @@ void Game::update() {
             }
         }
 
+        for(auto & base : bases){
+            bool capturing = false;
+            if(teamType != base.teamType) {
+                for (auto &animal : simple_animals) {
+                    if (base.is_in_base(animal->pos)) capturing = true;
+                }
+                for (auto &animal : enemy_animals) {
+                    if (base.is_in_base(animal->pos)) capturing = false;
+                }
+            }
+            if(!capturing) base.counterOfCaption = 0;
+            else if(capturing) base.counterOfCaption += 1;
+            if(base.counterOfCaption >= 40) {
+                base.counterOfCaption = 0;
+                base.teamType = teamType;
+            }
+
+        }
+
         for (auto enemy_animal : enemy_animals){
             for (auto bullet : bullets){
                 if (bullet->pos.distance(enemy_animal->pos) < enemy_animal->size + bullet->size){
@@ -301,6 +321,9 @@ void Game::render() {
 
 
         for (auto &base : bases) {
+            if(base.teamType == 0) base.picture.setFillColor(sf::Color(150, 150, 150));
+            else if (base.teamType == 1) base.picture.setFillColor(sf::Color(0, 200, 0));
+            else if(base.teamType == -1) base.picture.setFillColor(sf::Color(0, 100, 100));
             window->draw(base.picture);
             if (base.is_selected) {
                 window->draw(base.menu.picture);
@@ -470,7 +493,7 @@ void Game::initAnimal() {
         position.set_y(mouse.get_y());
         int i_spawn;
         for (int i = 0; i < bases.size(); i++) {
-            if (position.distance(bases[i].pos) < base_size) {
+            if (position.distance(bases[i].pos) < base_size and bases[i].teamType == teamType) {
                 near_base = true;
                 i_spawn = i;
                 position = bases[i_spawn].pos;
@@ -555,6 +578,22 @@ void Game::sendInfo() {
         text += std::to_string(int(10000 * bullets[i]->pos.get_y() / width));
         text += '_';
     }
+    int number_of_our_bases = 0;
+    vector<int> our_bases;
+    for(int i = 0; i < bases.size(); i++){
+        if (bases[i].teamType == teamType){
+            our_bases.push_back(i);
+            number_of_our_bases++;
+        }
+    }
+    text += std::to_string(number_of_our_bases);
+    text += '-';
+    for(int i = 0; i < number_of_our_bases; i++){
+        text += std::to_string(our_bases[i]);
+        text += '-';
+    }
+
+
     socket.send(text.c_str(), text.length() + 1);
 }
 
@@ -597,6 +636,10 @@ void Game::receiveInfo() {
         b->ally = false;
         enemy_bullets.push_back(b);
     }
+    int number_of_bases = stoi(read(k, buffer));
+    for(int i = 0; i < number_of_bases; i++){
+        bases[stoi(read(k, buffer))].teamType = -teamType;
+    }
 }
 
 bool Game::connect_to_server() {
@@ -614,7 +657,9 @@ bool Game::connect_to_server() {
 
         std::cout << "Waiting for the second player..." << endl;
         socket.receive(buffer, sizeof(buffer), received);
-        std::cout << buffer << endl;
+        teamType = std::stoi(buffer);
+        if(teamType == 1) bases[0].teamType = 1;
+        if(teamType == 2) bases[bases.size() - 1].teamType = 2;
         std::cout << "Game will be started soon..." << endl;
     } else std::cout << "You are offline" << endl;
     return is_connected;

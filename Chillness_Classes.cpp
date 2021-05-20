@@ -305,6 +305,8 @@ public:
     bool is_selected = false;
     int radius;
     int power = 0;
+    int teamType = 0;
+    int counterOfCaption = 0;
 
     explicit Base(Point pos_){
         pos = pos_;
