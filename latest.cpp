@@ -198,6 +198,7 @@ void Game::update() {
 
         for (auto &animal : simple_animals) {
             animal->tact_counter += 1;
+            animal->tact_counter2 += 1;
             for (auto bullet : enemy_bullets) {
                 if (bullet->pos.distance(animal->pos) < animal->size + bullet->size) {
                     bullet->hit(animal);
@@ -283,7 +284,7 @@ void Game::update() {
                 continue;
             }
             for (auto enemy_animal : enemy_animals){
-                if (bullets[i]->pos.distance(enemy_animal->pos) < bullets[i]->size + enemy_animal->size){
+                if (bullets[i]->pos.distance(enemy_animal->pos) < bullets[i]->size + enemy_animal->size - int(width/192)){
                     bullets.erase(bullets.begin() + i);
                     break;
                 }
