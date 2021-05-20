@@ -209,6 +209,7 @@ void Game::update() {
             }
             if (!animal->stable) animal->move();
             animal->attack();
+            animal->get_damage();
             if (animal->pos.get_x() < animal->size) animal->set_pos(Point(animal->size * 1.5, animal->pos.get_y()));
             if (animal->pos.get_x() > width - animal->size)
                 animal->set_pos(Point(width - animal->size * 1.5, animal->pos.get_y()));
@@ -585,6 +586,7 @@ void Game::sendInfo() {
             number_of_our_bases++;
         }
     }
+    if (number_of_our_bases == 0) window->close();
     text += std::to_string(number_of_our_bases);
     text += '_';
     for(int i = 0; i < number_of_our_bases; i++){
@@ -592,6 +594,7 @@ void Game::sendInfo() {
         text += '_';
     }
     text += std::to_string(running());
+    text += '_';
 
 
     socket.send(text.c_str(), text.length() + 1);
@@ -599,7 +602,7 @@ void Game::sendInfo() {
 
 void Game::receiveInfo() {
     size_t received;
-    char buffer[2000];
+    char buffer[20000];
     socket.receive(buffer, sizeof(buffer), received);
     int number_of_enemies, number_of_bullets;
     int k = 0;
@@ -648,7 +651,7 @@ bool Game::connect_to_server() {
     size_t received;
     char buffer[2000];
     username = "Egor";
-    sf::IpAddress ip = "10.55.128.181"; //192.168.1.2  10.55.128.181  10.55.132.150 - Michel on miptng
+    sf::IpAddress ip = "10.55.132.150"; //192.168.1.2  10.55.128.181  10.55.132.150 - Michel on miptng
     sf::TcpSocket::Status connection = socket.connect(ip, 2000);
     if(connection == sf::Socket::Done) {
         is_connected = true;

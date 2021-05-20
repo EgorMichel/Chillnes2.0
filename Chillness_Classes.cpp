@@ -94,6 +94,7 @@ public:
         type = 0;
         time_flag = clock();
         tact_counter = 0;
+        tact_counter2 = 0;
     }
     virtual ~Animal() = default;
     void move() {
@@ -103,6 +104,7 @@ public:
     }
     virtual void draw() = 0;
     virtual void attack() = 0;
+    virtual void get_damage() = 0;
     virtual void capture(Base* base) = 0;
     int get_energy() const{return energy;}
     int get_strength() const{return strength;}
@@ -126,7 +128,7 @@ public:
     int size;
     long int time_flag;
     bool ally = true;
-    int tact_counter = 0;
+    int tact_counter = 0, tact_counter2 = 0;
 protected:
     int energy, strength, price, speed, type;
     bool selected;
@@ -207,6 +209,7 @@ public:
     void attack() final;
     void capture(Base* base) final;
     void draw() final;
+    void get_damage() final{}
 };
 
 void Simple_Animal::draw() {
@@ -224,7 +227,7 @@ void Simple_Animal::draw() {
 void Simple_Animal::attack(){
     if (tact_counter < 20) return;
     for (auto opponent : enemy_animals)
-        if (pos.distance(opponent->pos) < 1.5 * (size + opponent->size)){
+        if (pos.distance(opponent->pos) < 1.5 * (size + opponent->size) and opponent->get_type() == 1){
             energy -= opponent->get_strength();
         }
     tact_counter = 0;
@@ -248,6 +251,7 @@ public:
     void attack() final;
     void capture(Base* base) final;
     void draw() final;
+    void get_damage() final;
 };
 
 void Shouter_Animal::draw() {
@@ -259,6 +263,16 @@ void Shouter_Animal::draw() {
     this->picture.setFillColor(this->color);
     this->picture.setOutlineThickness(0);
     this->picture.setOutlineColor(white);
+}
+
+
+void Shouter_Animal::get_damage(){
+    if (tact_counter2 < 20) return;
+    for (auto opponent : enemy_animals)
+        if (pos.distance(opponent->pos) < 1.5 * (size + opponent->size) and opponent->get_type() == 1){
+            energy -= opponent->get_strength();
+        }
+    tact_counter2 = 0;
 }
 
 void Shouter_Animal::attack() {
