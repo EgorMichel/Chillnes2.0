@@ -139,7 +139,6 @@ class Bullet{
 protected:
     int speed;
     int damage;
-    int lifetime = 0;
     long time_flag = 0;
     sf::Color color = sf::Color(0, 0, 0);
     double cosinus;
@@ -165,6 +164,7 @@ public:
     int size = width / 192;
     bool ally = true;
     int tact_counter = 0;
+    int lifetime = 0;
 };
 
 void Bullet::draw(){
@@ -179,14 +179,8 @@ void Bullet::draw(){
 }
 
 void Bullet::move(){
-    if (tact_counter > lifetime) {
-        auto iterator = std::find(bullets.begin(), bullets.end(), this);
-        bullets.erase(iterator);
-    }
-    else{
-        pos.set_x(pos.get_x() + speed * cosinus);
-        pos.set_y(pos.get_y() + speed * sinus);
-    }
+    pos.set_x(pos.get_x() + speed * cosinus);
+    pos.set_y(pos.get_y() + speed * sinus);
 }
 
 void Bullet::hit(Animal* animal){

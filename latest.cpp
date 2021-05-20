@@ -284,9 +284,12 @@ void Game::update() {
             }
         }
 
-        for (auto bullet : bullets){
-            bullet->move();
-            bullet->tact_counter += 1;
+        for (auto i = 0; i < bullets.size(); i++){
+            bullets[i]->move();
+            bullets[i]->tact_counter += 1;
+            if (bullets[i]->tact_counter > bullets[i]->lifetime) {
+                bullets.erase(bullets.begin() + i);
+            }
         }
 
 
@@ -651,7 +654,7 @@ bool Game::connect_to_server() {
     size_t received;
     char buffer[2000];
     username = "Egor";
-    sf::IpAddress ip = "10.55.128.101"; //192.168.1.2  10.55.128.181  10.55.132.150 - Michel on miptng
+    sf::IpAddress ip = "10.55.128.181"; //192.168.1.2  10.55.128.181  10.55.132.150 - Michel on miptng
     sf::TcpSocket::Status connection = socket.connect(ip, 2000);
     if(connection == sf::Socket::Done) {
         is_connected = true;
