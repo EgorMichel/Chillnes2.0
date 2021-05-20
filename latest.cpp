@@ -586,11 +586,12 @@ void Game::sendInfo() {
         }
     }
     text += std::to_string(number_of_our_bases);
-    text += '-';
+    text += '_';
     for(int i = 0; i < number_of_our_bases; i++){
         text += std::to_string(our_bases[i]);
-        text += '-';
+        text += '_';
     }
+    text += std::to_string(running());
 
 
     socket.send(text.c_str(), text.length() + 1);
@@ -640,13 +641,14 @@ void Game::receiveInfo() {
     for(int i = 0; i < number_of_bases; i++){
         bases[stoi(read(k, buffer))].teamType = -teamType;
     }
+    if (stoi(read(k, buffer)) == 0) window->close();
 }
 
 bool Game::connect_to_server() {
     size_t received;
     char buffer[2000];
     username = "Egor";
-    sf::IpAddress ip = "10.55.132.150"; //192.168.1.2  10.55.128.181  10.55.132.150 - Michel on miptng
+    sf::IpAddress ip = "10.55.128.181"; //192.168.1.2  10.55.128.181  10.55.132.150 - Michel on miptng
     sf::TcpSocket::Status connection = socket.connect(ip, 2000);
     if(connection == sf::Socket::Done) {
         is_connected = true;
@@ -659,7 +661,7 @@ bool Game::connect_to_server() {
         socket.receive(buffer, sizeof(buffer), received);
         teamType = std::stoi(buffer);
         if(teamType == 1) bases[0].teamType = 1;
-        if(teamType == 2) bases[bases.size() - 1].teamType = 2;
+        if(teamType == -1) bases[bases.size() - 1].teamType = -1;
         std::cout << "Game will be started soon..." << endl;
     } else std::cout << "You are offline" << endl;
     return is_connected;
