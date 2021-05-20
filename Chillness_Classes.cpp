@@ -23,8 +23,8 @@ using std::endl;
 float height = sf::VideoMode::getDesktopMode().height;
 float width = sf::VideoMode::getDesktopMode().width;
 float base_size = (float)width / 32;
-double energy = 100;
-vector<int> price_of_animal = {0, 5, 10, 30};
+double energy = 5;
+vector<int> price_of_animal = {0, 10, 20, 30};
 int selected_type = 1; //1 - simple, 2 - shouter
 sf::Font font;
 sf::Color green = sf::Color::Green;
@@ -89,10 +89,8 @@ public:
         pos = pos_;
         color = green;
         selected = false;
-        price = 0;
         size = width / 120;
         type = 0;
-        time_flag = clock();
         tact_counter = 0;
         tact_counter2 = 0;
     }
@@ -105,32 +103,28 @@ public:
     virtual void draw() = 0;
     virtual void attack() = 0;
     virtual void get_damage() = 0;
-    virtual void capture(Base* base) = 0;
     int get_energy() const{return energy;}
     int get_strength() const{return strength;}
-    int get_price() const{return price;}
     int get_speed() const{return speed;}
     int get_type() const{return type;}
     bool is_selected() const{return selected;}
     void set_energy(int energy_) {energy = energy_;}
-    void set_strength(int strength_) {strength = strength_;}
-    void set_price(int price_) {price = price_;}
-    void set_speed(int speed_) {speed = speed_;}
+//    void set_strength(int strength_) {strength = strength_;}
+//    void set_price(int price_) {price = price_;}
+//    void set_speed(int speed_) {speed = speed_;}
     void select(bool a) {selected = a;}
     Point get_pos() const {return pos;}
     void set_pos(Point a) {pos = a;}
-    Point get_aim() const {return aim;}
     void set_aim(Point a) {aim = a;}
     sf::CircleShape picture;
     bool stable = true;
     sf::Color color;
     Point pos, aim = pos;
     int size;
-    long int time_flag;
     bool ally = true;
     int tact_counter = 0, tact_counter2 = 0;
 protected:
-    int energy, strength, price, speed, type;
+    int energy, strength, speed, type;
     bool selected;
 };
 
@@ -139,7 +133,6 @@ class Bullet{
 protected:
     int speed;
     int damage;
-    long time_flag = 0;
     sf::Color color = sf::Color(0, 0, 0);
     double cosinus;
     double sinus;
@@ -148,7 +141,6 @@ public:
         speed = speed_;
         damage = damage_;
         lifetime = lifetime_;
-        time_flag = clock();
         pos = pos_;
         aim = aim_;
         cosinus = pos.delta_x(aim) / pos.distance(aim);
@@ -196,22 +188,17 @@ class Simple_Animal: public Animal
 public:
     Simple_Animal(int energy_, int strength_, int speed_, Point aim_, Point pos_):
             Animal(energy_, strength_, speed_, aim_, pos_){
-        price = 15;
         strength = strength_;
         speed = speed_;
         size = width / 120;
         type = 1;
     }
     void attack() final;
-    void capture(Base* base) final;
     void draw() final;
     void get_damage() final{}
 };
 
 void Simple_Animal::draw() {
-//    if (ally)
-//        color.a = 150 + energy;  // may be laggy with higher energy value
-//    else color.a = 255;
     picture.setRadius(this->size);
     picture.setPosition(this->get_pos().get_x(), this->get_pos().get_y());
     picture.setOrigin(this->size, this->size);
@@ -229,23 +216,19 @@ void Simple_Animal::attack(){
     tact_counter = 0;
 }
 
-void Simple_Animal::capture(Base* base){
-}
 
+// Shouter_Animal ========
 
-//Shouter_Animal
 class Shouter_Animal: public Animal{
 public:
     Shouter_Animal(int energy_, int strength_, int speed_, Point aim_, Point pos_):
             Animal(energy_, strength_, speed_, aim_, pos_){
-        price = 30;
         strength = strength_;
         speed = speed_;
         size = width / 100;
         type = 2;
     }
     void attack() final;
-    void capture(Base* base) final;
     void draw() final;
     void get_damage() final;
 };
@@ -292,9 +275,6 @@ void Shouter_Animal::attack() {
     }
 }
 
-void Shouter_Animal::capture(Base* base) {
-
-}
 
 //BaseMenu class--------------------------------------------------------
 class BaseMenu{

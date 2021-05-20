@@ -6,7 +6,7 @@ class Game
 private:
     //Private variables
     int teamType;
-    float velocity = 0.02;
+    float velocity = 0.05;
     sf::VideoMode videoMode;
     sf::Event ev{};
     sf::RectangleShape cursor;
@@ -68,7 +68,7 @@ Game::~Game() {
 }
 
 Game::Game() {
-    connect_to_server();
+//    connect_to_server();
     initVariables();
     initWindow();
     initCursor();
@@ -108,25 +108,42 @@ void Game::pollEvents() {
                     break;
 
                 case sf::Event::MouseButtonPressed:
-
                     if (ev.mouseButton.button == sf::Mouse::Left) {
-                        for (auto & simple_animal : simple_animals) {
-                            if (simple_animal->is_selected()) {
-                                simple_animal->select(false);
+
+                        if(sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)){
+                            int current_type = 0;
+                            for (auto animal : simple_animals) {
+                                if (mouse.distance(animal->pos) < animal->size) {
+                                    current_type = animal->get_type();
+                                }
+                                animal->select(false);
+                            }
+                            for (auto animal : simple_animals) {
+                                if (animal->get_type() == current_type) {
+                                    animal->select(true);
+                                }
                             }
                         }
-                        for (auto animal : simple_animals) {
-                            if (mouse.distance(animal->pos) < animal->size) animal->select(true);
+                        else{
+                            for (auto animal : simple_animals) {
+                                if (animal->is_selected() and not (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))) {
+                                    animal->select(false);
+                                }
+                                if (mouse.distance(animal->pos) < animal->size) {
+                                    animal->select(true);
+                                }
+                            }
                         }
+
 
                         mouse_0 = mouse;
                         area.setFillColor(sf::Color(200, 0, 100, 100));
 
-                        if(abs(mouse.get_x() - board.upgrade_1.picture.getPosition().x) < board.upgrade_1.picture.getSize().x/2 and
-                           abs(mouse.get_y() - board.upgrade_1.picture.getPosition().y) < board.upgrade_1.picture.getSize().y/2){
-                            if( energy >= 30*velocity*4) {
-                                velocity += 0.1;
-                                energy -= 30 * velocity * 4;
+                        if(std::abs(mouse.get_x() - board.upgrade_1.picture.getPosition().x) < board.upgrade_1.picture.getSize().x/2 and
+                           std::abs(mouse.get_y() - board.upgrade_1.picture.getPosition().y) < board.upgrade_1.picture.getSize().y/2){
+                            if( energy >= 30*velocity*8) {
+                                velocity += 0.05;
+                                energy -= 30 * velocity * 8;
                             }
                         }
                     }
@@ -192,9 +209,8 @@ void Game::update() {
                 number_of_our_bases++;
             }
         }
-        velocity *= sqrt(number_of_our_bases);
 
-        if(energy <= 100 - velocity) energy += velocity;
+        if(energy <= 100 - velocity) energy += velocity + number_of_our_bases * 0.02;
         board.chosen_type.setPosition(width * (5 + selected_type) / 15, height * 29 / 30);
 
         if (is_connected) updateEnemy();
@@ -348,8 +364,8 @@ void Game::render() {
             }
         }
         for (auto &animal : simple_animals) {
-            if (animal->is_selected()) animal->picture.setFillColor(sf::Color(255, 0, 0, int(animal->get_energy() * 0.5 + 127)  * 255/100));
-            else animal->picture.setFillColor(sf::Color(0, 255, 0, int(animal->get_energy() * 0.5 + 127)  * 255/100));
+            if (animal->is_selected()) animal->picture.setFillColor(sf::Color(255, 0, 0, int(animal->get_energy() / 2 + 50)  * 255/100));
+            else animal->picture.setFillColor(sf::Color(0, 255, 0, int(animal->get_energy() / 2 + 50)  * 255/100));
             animal->picture.setPosition(animal->pos.get_x(), animal->pos.get_y());
             window->draw(animal->picture);
         }
@@ -402,7 +418,7 @@ void Game::initBoard() {
     board.energy_lvl.setSize(sf::Vector2((width/10)*1.f,  (height/30)*1.f));
     board.energy_lvl.setFillColor(sf::Color::Blue);
 
-    board.energy_lvl_caption.setCharacterSize(height/30);
+    board.energy_lvl_caption.setCharacterSize(height / 30);
     board.energy_lvl_caption.setFont(font);
     board.energy_lvl_caption.setPosition(width*0.01, height*0.94);
     board.energy_lvl_caption.setFillColor(sf::Color (250, 200, 200));
@@ -439,11 +455,11 @@ void Game::initBoard() {
     board.upgrade_1.picture.setOutlineThickness(3);
     board.upgrade_1.picture.setPosition(width * 9 / 15, height * 29 / 30);
 
-    board.upgrade_1.caption.setCharacterSize(height/30);
+    board.upgrade_1.caption.setCharacterSize(height / 60);
     board.upgrade_1.caption.setFont(font);
-    board.upgrade_1.caption.setPosition(width * 9 / 15, height * 29 / 30);
+    board.upgrade_1.caption.setPosition(width * 0.576, height * 19 / 20);
     board.upgrade_1.caption.setFillColor(red);
-    board.upgrade_1.caption.setString("speed up");
+    board.upgrade_1.caption.setString("speed \n up");
 
     board.upgrade_2.picture.setSize(sf::Vector2(width/20, height/20));
     board.upgrade_2.picture.setOrigin(width/40, height/40);
@@ -452,11 +468,11 @@ void Game::initBoard() {
     board.upgrade_2.picture.setOutlineThickness(3);
     board.upgrade_2.picture.setPosition(width * 10 / 15, height * 29 / 30);
 
-    board.upgrade_2.caption.setCharacterSize(height/30);
+    board.upgrade_2.caption.setCharacterSize(height / 60);
     board.upgrade_2.caption.setFont(font);
-    board.upgrade_2.caption.setPosition(width * 10 / 15, height * 29 / 30);
+    board.upgrade_2.caption.setPosition(width * 0.64266, height * 19 / 20);
     board.upgrade_2.caption.setFillColor(red);
-    board.upgrade_2.caption.setString("health up");
+    board.upgrade_2.caption.setString("hp \n up");
 }
 
 void Game::initBase() {
@@ -504,7 +520,7 @@ void Game::initAnimal() {
         position.set_y(mouse.get_y());
         int i_spawn;
         for (int i = 0; i < bases.size(); i++) {
-            if (position.distance(bases[i].pos) < base_size and bases[i].teamType == teamType) {
+            if (position.distance(bases[i].pos) < base_size and (bases[i].teamType == teamType or not is_connected)) {
                 near_base = true;
                 i_spawn = i;
                 position = bases[i_spawn].pos;
@@ -842,7 +858,7 @@ int main() {
                 simple_animals.clear();
                 enemy_animals.clear();
                 bullets.clear();
-                energy = 100;
+                energy = 10;
 
                 delete game;
             }
