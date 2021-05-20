@@ -24,7 +24,7 @@ float height = sf::VideoMode::getDesktopMode().height;
 float width = sf::VideoMode::getDesktopMode().width;
 float base_size = (float)width / 32;
 double energy = 5;
-vector<int> price_of_animal = {0, 10, 20, 30};
+vector<int> price_of_animal = {0, 10, 20, 40};
 int selected_type = 1; //1 - simple, 2 - shouter
 sf::Font font;
 sf::Color green = sf::Color::Green;
@@ -104,7 +104,14 @@ public:
         pos.set_x(floor(pos.get_x() + speed * pos.delta_x(aim) / (pos.distance(aim) + 1)));
         pos.set_y(floor(pos.get_y() + speed * pos.delta_y(aim) / (pos.distance(aim) + 1)));
     }
-    virtual void draw() = 0;
+    void draw(){
+        picture.setRadius(this->size);
+        picture.setPosition(this->get_pos().get_x(), this->get_pos().get_y());
+        picture.setOrigin(this->size, this->size);
+        picture.setFillColor(this->color);
+        picture.setOutlineThickness(0);
+        picture.setOutlineColor(white);
+    }
     virtual void attack() = 0;
     virtual void get_damage() = 0;
     int get_energy() const{return energy;}
@@ -202,18 +209,8 @@ public:
         type = 1;
     }
     void attack() final;
-    void draw() final;
     void get_damage() final{}
 };
-
-void Simple_Animal::draw() {
-    picture.setRadius(this->size);
-    picture.setPosition(this->get_pos().get_x(), this->get_pos().get_y());
-    picture.setOrigin(this->size, this->size);
-    picture.setFillColor(this->color);
-    picture.setOutlineThickness(0);
-    picture.setOutlineColor(white);
-}
 
 void Simple_Animal::attack(){
     if (tact_counter < 20) return;
@@ -237,21 +234,8 @@ public:
         type = 2;
     }
     void attack() final;
-    void draw() final;
     void get_damage() final;
 };
-
-void Shouter_Animal::draw() {
-//    if (ally)
-//        color.a = 150 + energy;  // may be laggy with higher energy values
-    this->picture.setRadius(this->size);
-    this->picture.setPosition(this->get_pos().get_x(), this->get_pos().get_y());
-    this->picture.setOrigin(this->size, this->size);
-    this->picture.setFillColor(this->color);
-    this->picture.setOutlineThickness(0);
-    this->picture.setOutlineColor(white);
-}
-
 
 void Shouter_Animal::get_damage(){
     if (tact_counter2 < 20) return;
@@ -283,6 +267,41 @@ void Shouter_Animal::attack() {
     }
 }
 
+
+// Healer_Animal
+class Healer_Animal: public Animal{
+public:
+    Healer_Animal(int energy_, int strength_, int speed_, Point aim_, Point pos_):
+            Animal(energy_, strength_, speed_, aim_, pos_){
+        strength = strength_;
+        speed = speed_;
+        size = width / 100;
+        type = 3;
+    }
+    void attack() final;
+    void get_damage() final;
+};
+
+void Healer_Animal::attack() {
+    if (tact_counter < 8) return;
+    for (auto animal : simple_animals){
+        if (pos.distance(animal->pos) < width / 25){
+            if (animal->get_energy() < 100){
+                animal->set_energy(animal->get_energy() + 1);
+                tact_counter = 0;
+            }
+        }
+    }
+}
+
+void Healer_Animal::get_damage(){
+    if (tact_counter2 < 20) return;
+    for (auto opponent : enemy_animals)
+        if (pos.distance(opponent->pos) < 1.5 * (size + opponent->size) and opponent->get_type() == 1){
+            energy -= opponent->get_strength();
+        }
+    tact_counter2 = 0;
+}
 
 //BaseMenu class--------------------------------------------------------
 class BaseMenu{

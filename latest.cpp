@@ -68,7 +68,7 @@ Game::~Game() {
 }
 
 Game::Game() {
-//    connect_to_server();
+    connect_to_server();
     initVariables();
     initWindow();
     initCursor();
@@ -141,7 +141,7 @@ void Game::pollEvents() {
 
                         if(std::abs(mouse.get_x() - board.upgrade_1.picture.getPosition().x) < board.upgrade_1.picture.getSize().x/2 and
                            std::abs(mouse.get_y() - board.upgrade_1.picture.getPosition().y) < board.upgrade_1.picture.getSize().y/2){
-                            if( energy >= 30*velocity*8) {
+                            if( energy > 30 * velocity * 8) {
                                 velocity += 0.05;
                                 energy -= 30 * velocity * 8;
                             }
@@ -189,7 +189,7 @@ void Game::pollEvents() {
                             window->close();
                         }
                     }
-                        break;
+                    break;
 
                 case sf::Event::Closed:
                     this->window->close();
@@ -467,7 +467,7 @@ void Game::initBoard() {
     board.upgrade_1.caption.setFont(font);
     board.upgrade_1.caption.setPosition(width * 0.576, height * 19 / 20);
     board.upgrade_1.caption.setFillColor(red);
-    board.upgrade_1.caption.setString("speed \n up");
+    board.upgrade_1.caption.setString("speed \n   up");
 
     board.upgrade_2.picture.setSize(sf::Vector2(width/20, height/20));
     board.upgrade_2.picture.setOrigin(width/40, height/40);
@@ -480,7 +480,7 @@ void Game::initBoard() {
     board.upgrade_2.caption.setFont(font);
     board.upgrade_2.caption.setPosition(width * 0.64266, height * 19 / 20);
     board.upgrade_2.caption.setFillColor(red);
-    board.upgrade_2.caption.setString("hp \n up");
+    board.upgrade_2.caption.setString("hp \nup");
 }
 
 void Game::initBase() {
@@ -540,7 +540,7 @@ void Game::initAnimal() {
         if(near_base){
             for (auto &animal : simple_animals) {
                 if (position.distance(animal->get_pos()) < animal->size * 2) near_animal = true;
-                }
+            }
 
             if (!near_animal and energy >= price_of_animal[selected_type] and position.get_y() < height and
                 position.get_x() < width) {
@@ -559,12 +559,18 @@ void Game::initAnimal() {
                         simple_animals.push_back(beast);
                         break;
                     }
+                    case 3: {
+                        auto beast = new Healer_Animal(100, 10, (int)(width / 500), aim_, position);
+                        beast->draw();
+                        simple_animals.push_back(beast);
+                        break;
+                    }
                 }
                 spawned = true;
-                }
             }
         }
     }
+}
 
 
 void Game::box (){
@@ -577,7 +583,7 @@ void Game::box (){
 
     for (unsigned int i = 0; i < simple_animals.size(); i++){
         if ((simple_animals[i]->pos.get_x() < xmax && simple_animals[i]->pos.get_x() > xmin)
-        && (simple_animals[i]->pos.get_y() < ymax && simple_animals[i]->pos.get_y() > ymin)){
+            && (simple_animals[i]->pos.get_y() < ymax && simple_animals[i]->pos.get_y() > ymin)){
             simple_animals[i]->select(true);
             simple_animals[i]->picture.setFillColor(red);
         }
@@ -664,6 +670,13 @@ void Game::receiveInfo() {
             enemy->draw();
             enemy_animals.push_back(enemy);
         }
+        else if (type == 3) {
+            auto enemy = new Healer_Animal(100, 10, 5, pos, pos);
+            enemy->ally = false;
+            enemy->color = sf::Color::Cyan;
+            enemy->draw();
+            enemy_animals.push_back(enemy);
+        }
     }
     number_of_bullets = stoi(read(k, buffer));
     for(int i = 0; i < number_of_bullets; i++) {
@@ -686,7 +699,7 @@ bool Game::connect_to_server() {
     size_t received;
     char buffer[2000];
     username = "Egor";
-    sf::IpAddress ip = "10.55.128.181"; //192.168.1.2  10.55.128.181  10.55.132.150 - Michel on miptng
+    sf::IpAddress ip = "192.168.1.2"; //192.168.1.2  10.55.128.181  10.55.132.150 - Michel on miptng
     sf::TcpSocket::Status connection = socket.connect(ip, 2000);
     if(connection == sf::Socket::Done) {
         is_connected = true;
@@ -728,34 +741,34 @@ public:
     bool loading = false;
 
     void pollEvents() {
-            while (this->window->pollEvent(this->ev)) {
-                switch (this->ev.type) {
-                    case sf::Event::Closed:
+        while (this->window->pollEvent(this->ev)) {
+            switch (this->ev.type) {
+                case sf::Event::Closed:
+                    this->window->close();
+                    break;
+                case sf::Event::KeyPressed:
+                    if (this->ev.key.code == sf::Keyboard::Escape)
                         this->window->close();
-                        break;
-                    case sf::Event::KeyPressed:
-                        if (this->ev.key.code == sf::Keyboard::Escape)
-                            this->window->close();
-                        else if (this->ev.key.code == sf::Keyboard::Enter)
-                            //choice = "start new game";
+                    else if (this->ev.key.code == sf::Keyboard::Enter)
+                        //choice = "start new game";
                         break;
 
-                    case sf::Event::MouseButtonPressed:
-                        if (this->ev.mouseButton.button == sf::Mouse::Left) {
-                            if(abs(mouse.get_x() - newGameButton.getPosition().x) < newGameButton.getSize().x/2 and
-                            abs(mouse.get_y() - newGameButton.getPosition().y) < newGameButton.getSize().y/2){
-                                choice = "start new game";
-                            }
-                            if(abs(mouse.get_x() - aboutButton.getPosition().x) < aboutButton.getSize().x/2 and
-                                    abs(mouse.get_y() - aboutButton.getPosition().y) < aboutButton.getSize().y/2){
-                                choice = "about";
-                            }
-                            if(abs(mouse.get_x() - exitButton.getPosition().x) < exitButton.getSize().x/2 and
-                                    abs(mouse.get_y() - exitButton.getPosition().y) < exitButton.getSize().y/2){
-                                choice = "exit";
-                            }
+                case sf::Event::MouseButtonPressed:
+                    if (this->ev.mouseButton.button == sf::Mouse::Left) {
+                        if(abs(mouse.get_x() - newGameButton.getPosition().x) < newGameButton.getSize().x/2 and
+                           abs(mouse.get_y() - newGameButton.getPosition().y) < newGameButton.getSize().y/2){
+                            choice = "start new game";
                         }
-                        break;
+                        if(abs(mouse.get_x() - aboutButton.getPosition().x) < aboutButton.getSize().x/2 and
+                           abs(mouse.get_y() - aboutButton.getPosition().y) < aboutButton.getSize().y/2){
+                            choice = "about";
+                        }
+                        if(abs(mouse.get_x() - exitButton.getPosition().x) < exitButton.getSize().x/2 and
+                           abs(mouse.get_y() - exitButton.getPosition().y) < exitButton.getSize().y/2){
+                            choice = "exit";
+                        }
+                    }
+                    break;
 
             }
         }
@@ -842,35 +855,35 @@ int main() {
         while (mm.choice == "0") {
             mm.update();
             mm.render();
-            }
-
-    //Init Game
-            if (mm.choice == "start new game") {
-                mm.loading = true;
-                mm.window->close();
-                Game * game = new Game();
-                /*while (not game->readyToStart){
-                    cout << mm.loading;
-                    mm.render();
-                }*/
-
-
-
-    //Game loop
-                while (game->running()) {
-    //Update
-                    game->update();
-    //Render
-                    game->render();
-                }
-                simple_animals.clear();
-                enemy_animals.clear();
-                bullets.clear();
-                energy = 10;
-
-                delete game;
-            }
-           else if(mm.choice == "exit") break;
         }
+
+        //Init Game
+        if (mm.choice == "start new game") {
+            mm.loading = true;
+            mm.window->close();
+            Game * game = new Game();
+            /*while (not game->readyToStart){
+                cout << mm.loading;
+                mm.render();
+            }*/
+
+
+
+            //Game loop
+            while (game->running()) {
+                //Update
+                game->update();
+                //Render
+                game->render();
+            }
+            simple_animals.clear();
+            enemy_animals.clear();
+            bullets.clear();
+            energy = 10;
+
+            delete game;
+        }
+        else if(mm.choice == "exit") break;
+    }
     return 0;
 }
