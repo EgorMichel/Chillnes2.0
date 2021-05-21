@@ -389,14 +389,13 @@ void Game::render() {
             }
         }
         for (auto &animal : simple_animals) {
-            texture.setRepeated(true);
-            animal->picture.setFillColor(sf::Color(255, 255, 255));
-            const sf::Texture * t = &texture;
+            if (animal->get_type() == 1) animal->picture.setFillColor(sf::Color(200, 150, 100, (100 + animal->get_energy()*155/100)));
+            if (animal->get_type() == 2) animal->picture.setFillColor(sf::Color(100, 130, 0, (100 + animal->get_energy()*155/100)));
+            if (animal->get_type() == 3) animal->picture.setFillColor(sf::Color(0, 255, 0, (100 + animal->get_energy()*155/100)));
             animal->picture.setOutlineThickness(4);
             if (animal->is_selected()) animal->picture.setOutlineColor(sf::Color(255, 0, 0));
-            else animal->picture.setOutlineColor(sf::Color(0, 255, 0));
+            else animal->picture.setOutlineColor(sf::Color(255, 255, 255, 0));
             animal->picture.setPosition(animal->pos.get_x(), animal->pos.get_y());
-            animal->picture.setTexture(t);
             window->draw(animal->picture);
         }
         for (auto &animal : enemy_animals) {
@@ -717,10 +716,11 @@ void Game::receiveInfo() {
         else if (type == 3) {
             auto enemy = new Healer_Animal(100, 10, 5, pos, pos);
             enemy->ally = false;
-            enemy->color = sf::Color::White;
             enemy->draw();
-            const sf::Texture * t = &enemy_texture;
-            enemy->picture.setTexture(t);
+            if (enemy->get_type() == 1) enemy->picture.setFillColor(sf::Color(200, 100, 150));
+            if (enemy->get_type() == 2) enemy->picture.setFillColor(sf::Color(100, 0, 130));
+            if (enemy->get_type() == 3) enemy->picture.setFillColor(sf::Color(255, 0, 255));
+
             enemy_animals.push_back(enemy);
         }
     }
