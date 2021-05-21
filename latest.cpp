@@ -357,6 +357,7 @@ void Game::render() {
         window->draw(board.chosen_type);
         window->draw(board.type_1);
         window->draw(board.type_2);
+        window->draw(board.type_3);
         window->draw(cursor);
         window->draw(board.upgrade_1.picture);
         window->draw(board.upgrade_2.picture);
@@ -476,6 +477,11 @@ void Game::initBoard() {
     board.type_2.setOrigin(width/100, width/100);
     board.type_2.setFillColor(green);
     board.type_2.setPosition(width * 7 / 15, height * 29 / 30);
+
+    board.type_3.setRadius(width/100);
+    board.type_3.setOrigin(width/100, width/100);
+    board.type_3.setFillColor(green);
+    board.type_3.setPosition(width * 8 / 15, height * 29 / 30);
 
     board.upgrade_1.picture.setSize(sf::Vector2(width/20, height/20));
     board.upgrade_1.picture.setOrigin(width/40, height/40);
@@ -912,7 +918,7 @@ int main() {
     sound_2.setBuffer(buf_2);
 
 
-    font.loadFromFile("/home/egorchan/Chillnes2.0/font_1.ttf");
+    font.loadFromFile("/home/egor/Рабочий стол/Repositories/Chillnes2.0/font_1.ttf");
     while (true){
         MainMenu mm;
         mm.choice = "0";

@@ -377,6 +377,7 @@ struct Board{
     sf::Text energy_lvl_caption;
     sf::CircleShape type_1;
     sf::CircleShape type_2;
+    sf::CircleShape type_3;
     button upgrade_1;
     button upgrade_2;
 };
