@@ -4,6 +4,8 @@
 class Game
 {
 private:
+    const sf::Texture * base_t_1 = &enemy_texture;
+    const sf::Texture * base_t_2 = &base_texture;
     //Private variables
     int teamType;
     float velocity = 0.05;
@@ -368,16 +370,12 @@ void Game::render() {
         for (auto &base : bases) {
             if(base.teamType == 0) base.picture.setFillColor(sf::Color(150, 150, 150));
             else if (base.teamType == 1) {
-                texture.setRepeated(false);
-                base.picture.setFillColor(sf::Color(255, 255, 255));
-                const sf::Texture * t = &texture;
-                base.picture.setTexture(t);
+                //base.picture.setFillColor(sf::Color(255, 255, 255));
+                base.picture.setTexture(base_t_1);
             }
             else if(base.teamType == -1){
-                base_1_texture.setRepeated(false);
-                base.picture.setFillColor(sf::Color(255, 255, 255));
-                const sf::Texture * t = &enemy_texture;
-                base.picture.setTexture(t);
+                //base.picture.setFillColor(sf::Color(255, 255, 255));
+                base.picture.setTexture(base_t_2);
             }
             window->draw(base.picture);
             if (base.is_selected) {
@@ -516,7 +514,7 @@ void Game::initBase() {
         bases[i].picture.setOrigin(base_size, base_size);
         bases[i].picture.setPosition(bases[i].pos.get_x(), bases[i].pos.get_y());
         bases[i].picture.setRadius(bases[i].radius);
-        bases[i].picture.setFillColor(bases[i].color);
+        //bases[i].picture.setFillColor(bases[i].color);
     }
 }
 
