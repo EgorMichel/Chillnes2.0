@@ -368,7 +368,7 @@ void Game::render() {
             if(base.teamType == 0) base.picture.setFillColor(sf::Color(150, 150, 150));
             else if (base.teamType == 1) {
                 base.picture.setFillColor(sf::Color(255, 255, 255));
-                const sf::Texture * t = &base_texture;
+                const sf::Texture * t = &texture;
                 base.picture.setTexture(t);
             }
             else if(base.teamType == -1){
@@ -389,9 +389,11 @@ void Game::render() {
         }
         for (auto &animal : simple_animals) {
             texture.setRepeated(true);
+            animal->picture.setFillColor(sf::Color(255, 255, 255));
             const sf::Texture * t = &texture;
-            if (animal->is_selected()) animal->picture.setFillColor(sf::Color(255, 200, 200, int(animal->get_energy() / 2 + 50)  * 255/100));
-            else animal->picture.setFillColor(sf::Color(200, 255, 200, int(animal->get_energy() / 2 + 50)  * 255/100));
+            animal->picture.setOutlineThickness(4);
+            if (animal->is_selected()) animal->picture.setOutlineColor(sf::Color(255, 0, 0));
+            else animal->picture.setOutlineColor(sf::Color(0, 255, 0));
             animal->picture.setPosition(animal->pos.get_x(), animal->pos.get_y());
             animal->picture.setTexture(t);
             window->draw(animal->picture);
@@ -737,7 +739,7 @@ bool Game::connect_to_server() {
     size_t received;
     char buffer[2000];
     username = "Egor";
-    sf::IpAddress ip = "192.168.0.107"; //192.168.1.2  10.55.128.181  10.55.132.150 - Michel on miptng
+    sf::IpAddress ip = "10.55.128.44"; //192.168.1.2  10.55.128.181  10.55.132.150 - Michel on miptng
     sf::TcpSocket::Status connection = socket.connect(ip, 2000);
     if(connection == sf::Socket::Done) {
         is_connected = true;
@@ -886,7 +888,7 @@ public:
 
 //------------------------------------------------------GAME LOOP-------------------------------------------------------
 int main() {
-    texture.loadFromFile("/home/egorchan/Chillnes2.0/faki.png");
+    texture.loadFromFile("/home/egorchan/Chillnes2.0/p1.png");
     enemy_texture.loadFromFile("/home/egorchan/Chillnes2.0/p2.png");
     base_texture.loadFromFile("/home/egorchan/Chillnes2.0/round.jpg");
     base_1_texture.loadFromFile("/home/egorchan/Chillnes2.0/base.jpg");
