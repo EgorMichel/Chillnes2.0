@@ -368,13 +368,15 @@ void Game::render() {
         for (auto &base : bases) {
             if(base.teamType == 0) base.picture.setFillColor(sf::Color(150, 150, 150));
             else if (base.teamType == 1) {
+                texture.setRepeated(false);
                 base.picture.setFillColor(sf::Color(255, 255, 255));
                 const sf::Texture * t = &texture;
                 base.picture.setTexture(t);
             }
             else if(base.teamType == -1){
+                base_1_texture.setRepeated(false);
                 base.picture.setFillColor(sf::Color(255, 255, 255));
-                const sf::Texture * t = &base_1_texture;
+                const sf::Texture * t = &enemy_texture;
                 base.picture.setTexture(t);
             }
             window->draw(base.picture);
@@ -697,30 +699,23 @@ void Game::receiveInfo() {
         if (type == 1) {
             auto enemy = new Simple_Animal(100, 10, 5, pos, pos);
             enemy->ally = false;
-            enemy->color = sf::Color::White;
             enemy->draw();
-            const sf::Texture * t = &enemy_texture;
-            enemy->picture.setTexture(t);
+            enemy->picture.setFillColor(sf::Color(200, 100, 150));
             enemy_animals.push_back(enemy);
 
         }
         else if (type == 2) {
             auto enemy = new Shouter_Animal(100, 10, 5, pos, pos);
             enemy->ally = false;
-            enemy->color = sf::Color::White;
             enemy->draw();
-            const sf::Texture * t = &enemy_texture;
-            enemy->picture.setTexture(t);
+            enemy->picture.setFillColor(sf::Color(100, 0, 130));
             enemy_animals.push_back(enemy);
         }
         else if (type == 3) {
             auto enemy = new Healer_Animal(100, 10, 5, pos, pos);
             enemy->ally = false;
             enemy->draw();
-            if (enemy->get_type() == 1) enemy->picture.setFillColor(sf::Color(200, 100, 150));
-            if (enemy->get_type() == 2) enemy->picture.setFillColor(sf::Color(100, 0, 130));
-            if (enemy->get_type() == 3) enemy->picture.setFillColor(sf::Color(255, 0, 255));
-
+            enemy->picture.setFillColor(sf::Color(255, 0, 255));
             enemy_animals.push_back(enemy);
         }
     }
