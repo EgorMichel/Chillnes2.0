@@ -10,6 +10,8 @@
 #include <random>
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
+#include <SFML/System.hpp>
+#include <SFML/Audio.hpp>
 #include <SFML/Network.hpp>
 #include <string>
 
@@ -27,6 +29,15 @@ double energy = 5;
 vector<int> price_of_animal = {0, 10, 20, 40};
 int selected_type = 1; //1 - simple, 2 - shouter
 sf::Font font;
+sf::Texture texture;
+sf::Texture enemy_texture;
+sf::Texture base_texture;
+sf::Texture base_1_texture;
+sf::Texture background_texture;
+sf::SoundBuffer buf;
+sf::SoundBuffer buf_2;
+sf::Sound sound;
+sf::Sound sound_2;
 sf::Color green = sf::Color::Green;
 sf::Color red = sf::Color::Red;
 sf::Color white = sf::Color::White;
@@ -260,6 +271,10 @@ void Shouter_Animal::attack() {
             }
         }
         Point aim_ = enemy_animals[index]->pos;
+        sound_2.setBuffer(buf_2);
+        sound_2.setVolume(10);
+        sound_2.play();
+
         auto bullet = new Bullet(int(width / 192), strength, 20, pos, aim_);
         bullet->draw();
         bullets.push_back(bullet);

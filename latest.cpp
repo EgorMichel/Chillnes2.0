@@ -53,9 +53,11 @@ public:
 //Functions definitions:
 void Game::initVariables() {
     window = nullptr;
+
 }
 
 void Game::initWindow() {
+
     this->videoMode.height = height;
     this->videoMode.width = width;
     this->window = new sf::RenderWindow(this->videoMode, "Chillness", sf::Style::Titlebar | sf::Style::Fullscreen);
@@ -340,7 +342,13 @@ void Game::update() {
 
 void Game::render() {
     if(not isInMenu) {
+        const sf::Texture * t = &background_texture;
         window->clear(sf::Color(5, 0, 90, 255));
+        sf::RectangleShape back;
+        back.setSize(sf::Vector2(width, height));
+        back.setPosition(0,0);
+        back.setTexture(t);
+        window->draw(back);
         window->draw(board.board);
         window->draw(board.energy_lvl_back);
         window->draw(board.energy_lvl);
@@ -358,8 +366,16 @@ void Game::render() {
 
         for (auto &base : bases) {
             if(base.teamType == 0) base.picture.setFillColor(sf::Color(150, 150, 150));
-            else if (base.teamType == 1) base.picture.setFillColor(sf::Color(0, 200, 0));
-            else if(base.teamType == -1) base.picture.setFillColor(sf::Color(0, 100, 100));
+            else if (base.teamType == 1) {
+                base.picture.setFillColor(sf::Color(255, 255, 255));
+                const sf::Texture * t = &base_texture;
+                base.picture.setTexture(t);
+            }
+            else if(base.teamType == -1){
+                base.picture.setFillColor(sf::Color(255, 255, 255));
+                const sf::Texture * t = &base_1_texture;
+                base.picture.setTexture(t);
+            }
             window->draw(base.picture);
             if (base.is_selected) {
                 window->draw(base.menu.picture);
@@ -372,9 +388,12 @@ void Game::render() {
             }
         }
         for (auto &animal : simple_animals) {
-            if (animal->is_selected()) animal->picture.setFillColor(sf::Color(255, 0, 0, int(animal->get_energy() / 2 + 50)  * 255/100));
-            else animal->picture.setFillColor(sf::Color(0, 255, 0, int(animal->get_energy() / 2 + 50)  * 255/100));
+            texture.setRepeated(true);
+            const sf::Texture * t = &texture;
+            if (animal->is_selected()) animal->picture.setFillColor(sf::Color(255, 200, 200, int(animal->get_energy() / 2 + 50)  * 255/100));
+            else animal->picture.setFillColor(sf::Color(200, 255, 200, int(animal->get_energy() / 2 + 50)  * 255/100));
             animal->picture.setPosition(animal->pos.get_x(), animal->pos.get_y());
+            animal->picture.setTexture(t);
             window->draw(animal->picture);
         }
         for (auto &animal : enemy_animals) {
@@ -548,24 +567,37 @@ void Game::initAnimal() {
                 Point aim_ = position;
                 switch (selected_type) {
                     case 1: {
+                        sound.setBuffer(buf);
+                        sound.setVolume(30);
+                        sound.setPitch(3.f);
+                        sound.play();
                         auto beast = new Simple_Animal(100, 10, (int)(width / 500), aim_, position);
                         beast->draw();
                         simple_animals.push_back(beast);
                         break;
                     }
                     case 2: {
+                        sound.setBuffer(buf);
+                        sound.setVolume(30);
+                        sound.setPitch(2.f);
+                        sound.play();
                         auto beast = new Shouter_Animal(100, 10, (int)(width / 500), aim_, position);
                         beast->draw();
                         simple_animals.push_back(beast);
                         break;
                     }
                     case 3: {
+                        sound.setBuffer(buf);
+                        sound.setVolume(30);
+                        sound.setPitch(1.2f);
+                        sound.play();
                         auto beast = new Healer_Animal(100, 10, (int)(width / 500), aim_, position);
                         beast->draw();
                         simple_animals.push_back(beast);
                         break;
                     }
                 }
+
                 spawned = true;
             }
         }
@@ -658,23 +690,29 @@ void Game::receiveInfo() {
         if (type == 1) {
             auto enemy = new Simple_Animal(100, 10, 5, pos, pos);
             enemy->ally = false;
-            enemy->color = sf::Color::Cyan;
+            enemy->color = sf::Color::White;
             enemy->draw();
+            const sf::Texture * t = &enemy_texture;
+            enemy->picture.setTexture(t);
             enemy_animals.push_back(enemy);
 
         }
         else if (type == 2) {
             auto enemy = new Shouter_Animal(100, 10, 5, pos, pos);
             enemy->ally = false;
-            enemy->color = sf::Color::Cyan;
+            enemy->color = sf::Color::White;
             enemy->draw();
+            const sf::Texture * t = &enemy_texture;
+            enemy->picture.setTexture(t);
             enemy_animals.push_back(enemy);
         }
         else if (type == 3) {
             auto enemy = new Healer_Animal(100, 10, 5, pos, pos);
             enemy->ally = false;
-            enemy->color = sf::Color::Cyan;
+            enemy->color = sf::Color::White;
             enemy->draw();
+            const sf::Texture * t = &enemy_texture;
+            enemy->picture.setTexture(t);
             enemy_animals.push_back(enemy);
         }
     }
@@ -699,7 +737,7 @@ bool Game::connect_to_server() {
     size_t received;
     char buffer[2000];
     username = "Egor";
-    sf::IpAddress ip = "192.168.1.2"; //192.168.1.2  10.55.128.181  10.55.132.150 - Michel on miptng
+    sf::IpAddress ip = "192.168.0.107"; //192.168.1.2  10.55.128.181  10.55.132.150 - Michel on miptng
     sf::TcpSocket::Status connection = socket.connect(ip, 2000);
     if(connection == sf::Socket::Done) {
         is_connected = true;
@@ -848,7 +886,31 @@ public:
 
 //------------------------------------------------------GAME LOOP-------------------------------------------------------
 int main() {
-    font.loadFromFile("/home/egor/Рабочий стол/Repositories/Chillnes2.0/font_1.ttf");
+    texture.loadFromFile("/home/egorchan/Chillnes2.0/faki.png");
+    enemy_texture.loadFromFile("/home/egorchan/Chillnes2.0/p2.png");
+    base_texture.loadFromFile("/home/egorchan/Chillnes2.0/round.jpg");
+    base_1_texture.loadFromFile("/home/egorchan/Chillnes2.0/base.jpg");
+    background_texture.loadFromFile("/home/egorchan/Chillnes2.0/background.jpg");
+
+
+
+
+    sf::Music music;//создаем объект музыки
+    music.openFromFile("/home/egorchan/Chillnes2.0/music.ogg");//загружаем файл
+    music.setLoop(true);
+    music.setVolume(15);
+    music.play();
+
+    buf.loadFromFile("/home/egorchan/Chillnes2.0/spawn.ogg");
+    sf::Sound sound;
+    sound.setBuffer(buf);
+
+    buf_2.loadFromFile("/home/egorchan/Chillnes2.0/shoot.wav");
+    sf::Sound sound_2;
+    sound_2.setBuffer(buf_2);
+
+
+    font.loadFromFile("/home/egorchan/Chillnes2.0/font_1.ttf");
     while (true){
         MainMenu mm;
         mm.choice = "0";
@@ -859,6 +921,7 @@ int main() {
 
         //Init Game
         if (mm.choice == "start new game") {
+
             mm.loading = true;
             mm.window->close();
             Game * game = new Game();
